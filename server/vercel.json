@@ -1,0 +1,15 @@
+{
+  "framework": "node",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "port": 4844,
+  "env": {
+    "MONGODB_URI": "@mongodb-uri",
+    "JWT_SECRET": "@jwt-secret",
+    "TELEGRAM_BOT_TOKEN": "@telegram-bot-token",
+    "TELEGRAM_CHAT_ID": "@telegram-chat-id",
+    "NODE_ENV": "production"
+  },
+  "regions": ["sin1"]
+}

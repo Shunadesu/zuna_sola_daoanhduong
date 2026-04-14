@@ -1,0 +1,10 @@
+# Uploads directory - stores uploaded images locally
+# This folder is gitignored
+/uploads/*
+!/uploads/.gitkeep
+
+# Keep the folder structure but ignore files
+node_modules/
+dist/
+.env
+*.log
