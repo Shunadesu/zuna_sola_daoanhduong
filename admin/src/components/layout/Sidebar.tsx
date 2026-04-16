@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
@@ -9,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  X,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -22,17 +22,20 @@ const menuItems = [
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggle, mobileOpen = false, onMobileClose }: SidebarProps) {
   const location = useLocation();
   const { logout, user } = useAuthStore();
 
-  return (
-    <aside
+  const sidebarContent = (
+    <div
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300 flex flex-col',
-        isCollapsed ? 'w-16' : 'w-64'
+        'h-screen bg-card border-r transition-all duration-300 flex flex-col',
+        isCollapsed ? 'w-16' : 'w-64',
+        mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
     >
       {/* Logo */}
@@ -42,7 +45,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         )}
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-accent transition-colors"
+          className="p-2 rounded-lg hover:bg-accent transition-colors hidden lg:block"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {isCollapsed ? (
             <ChevronRight className="w-5 h-5" />
@@ -53,7 +57,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4">
+      <nav className="flex-1 py-4" role="navigation" aria-label="Main navigation">
         <ul className="space-y-1 px-2">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -63,14 +67,16 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <li key={item.path}>
                 <Link
                   to={item.path}
+                  onClick={onMobileClose}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                     isActive
                       ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent'
+                      : 'hover:bg-accent text-foreground'
                   )}
+                  aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className="w-5 h-5 min-w-[20px]" />
+                  <Icon className="w-5 h-5 min-w-[20px]" aria-hidden="true" />
                   {!isCollapsed && <span>{item.label}</span>}
                 </Link>
               </li>
@@ -83,7 +89,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className="border-t p-4">
         {!isCollapsed && user && (
           <div className="mb-3 text-sm text-muted-foreground">
-            {user.username}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium truncate">{user.username}</p>
+              </div>
+            </div>
           </div>
         )}
         <button
@@ -93,10 +106,40 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             isCollapsed && 'justify-center'
           )}
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5" aria-hidden="true" />
           {!isCollapsed && <span>Đăng xuất</span>}
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-40 hidden lg:flex',
+          isCollapsed ? 'w-16' : 'w-64'
+        )}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar (drawer) */}
+      <aside className="fixed left-0 top-0 z-50 lg:hidden">
+        <div className="relative">
+          {sidebarContent}
+          {mobileOpen && (
+            <button
+              onClick={onMobileClose}
+              className="absolute -right-10 top-4 left-full ml-2 p-2 rounded-lg bg-card border shadow-lg hover:bg-accent transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+      </aside>
+    </>
   );
 }

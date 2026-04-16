@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { statsApi, quoteApi } from '@/lib/api';
-import { statsApi as statsApi2 } from '@/lib/api';
+import { useEffect, useState, useCallback } from 'react';
+import { statsApi } from '@/lib/api';
+import { SkeletonCard, SkeletonChart } from '@/components/ui/Skeleton';
+import { useToast } from '@/components/ui/Toast';
 import {
   LineChart,
   Line,
@@ -40,31 +41,37 @@ interface QuoteStatusStat {
   color: string;
 }
 
+const PIE_COLORS = ['#22c55e', '#eab308', '#6b7280'];
+
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
   const [quoteStats, setQuoteStats] = useState<QuoteStatusStat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [statsRes, dailyRes, quoteRes] = await Promise.all([
+        statsApi.getDashboard(),
+        statsApi.getDaily(),
+        statsApi.getQuoteStatus(),
+      ]);
+      setStats(statsRes.data.data);
+      setDailyStats(dailyRes.data.data);
+      setQuoteStats(quoteRes.data.data);
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || 'Không thể tải dữ liệu. Vui lòng thử lại.';
+      toast({ type: 'error', title: 'Lỗi tải dữ liệu', description: msg });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsRes, dailyRes, quoteRes] = await Promise.all([
-          statsApi.getDashboard(),
-          statsApi2.getDaily(),
-          statsApi2.getQuoteStatus(),
-        ]);
-        setStats(statsRes.data.data);
-        setDailyStats(dailyRes.data.data);
-        setQuoteStats(quoteRes.data.data);
-      } catch (error) {
-        console.error('Failed to fetch stats:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const statCards = [
     {
@@ -99,8 +106,17 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SkeletonChart />
+          <SkeletonChart />
+        </div>
       </div>
     );
   }
@@ -108,13 +124,13 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="bg-card rounded-xl border p-6 flex items-center gap-4"
+              className="bg-card rounded-xl border p-5 flex items-center gap-4 hover:shadow-md transition-shadow cursor-default"
             >
               <div className={`p-3 rounded-lg ${card.bg}`}>
                 <Icon className={`w-6 h-6 ${card.color}`} />
@@ -159,13 +175,19 @@ export default function Dashboard() {
                       month: '2-digit',
                     })
                   }
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '0.5rem',
+                  }}
                 />
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="#3b82f6"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2}
-                  dot={{ fill: '#3b82f6' }}
+                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                  activeDot={{ r: 6 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -191,23 +213,29 @@ export default function Dashboard() {
                   outerRadius={80}
                   paddingAngle={5}
                 >
-                  {quoteStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {quoteStats.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '0.5rem',
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center gap-4 mt-4">
-            {quoteStats.map((stat) => (
+            {quoteStats.map((stat, index) => (
               <div key={stat.name} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: stat.color }}
+                  style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
                 />
                 <span className="text-sm">
-                  {stat.name}: {stat.value}
+                  {stat.name}: <strong>{stat.value}</strong>
                 </span>
               </div>
             ))}

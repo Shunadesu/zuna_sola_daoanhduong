@@ -1,5 +1,10 @@
 export { Button, type ButtonProps } from './Button';
 export { Input, type InputProps } from './Input';
+export { Textarea, type TextareaProps } from './Textarea';
+export { Select, type SelectProps, type SelectOption } from './Select';
 export { Label, type LabelProps } from './Label';
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card';
 export { Section } from './Section';
+export { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from './Dialog';
+export { Accordion } from './Accordion';
+export { Tabs } from './Tabs';

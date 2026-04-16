@@ -1,13 +1,15 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'outline' | 'ghost' | 'destructive';
   size?: 'default' | 'sm' | 'lg' | 'icon';
+  loading?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+  ({ className, variant = 'default', size = 'default', loading = false, disabled, children, ...props }, ref) => {
     return (
       <button
         className={cn(
@@ -23,15 +25,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           },
           {
             'h-10 px-4 py-2': size === 'default',
-            'h-9 rounded-md px-3': size === 'sm',
-            'h-11 rounded-lg px-8': size === 'lg',
+            'h-9 rounded-md px-3 text-sm': size === 'sm',
+            'h-12 rounded-lg px-8 text-base': size === 'lg',
             'h-10 w-10': size === 'icon',
           },
           className
         )}
         ref={ref}
+        disabled={disabled || loading}
         {...props}
-      />
+      >
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+        {children}
+      </button>
     );
   }
 );

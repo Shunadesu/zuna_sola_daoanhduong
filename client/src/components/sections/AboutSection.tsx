@@ -55,7 +55,7 @@ export function AboutSection() {
             </FadeInUp>
 
             <StaggerContainer className="grid grid-cols-2 gap-6">
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <StaggerItem key={feature.label}>
                   <motion.div
                     whileHover={{ scale: 1.05 }}

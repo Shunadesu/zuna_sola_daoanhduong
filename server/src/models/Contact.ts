@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type ContactType = 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'quote';
+type ContactType = 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'quote';
 
 export interface IContact extends Document {
   type: ContactType;
@@ -28,4 +28,7 @@ const ContactSchema = new Schema({
 
 ContactSchema.index({ isActive: 1, sortOrder: 1 });
 
-export const Contact = mongoose.model<IContact>('Contact', ContactSchema);
+export const Contact: Model<IContact> = mongoose.model<IContact>('Contact', ContactSchema);
+export type { IContact };
+export type { ContactType };
+export default Contact;

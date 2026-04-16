@@ -1,12 +1,13 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Send, CheckCircle, Loader2 } from 'lucide-react';
+import { Send, CheckCircle, Phone, Mail, MapPin } from 'lucide-react';
 import { FadeInUp } from '@/components/animated';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui';
+import { Textarea } from '@/components/ui';
+import { Select } from '@/components/ui';
 import { Label } from '@/components/ui';
 import { useQuoteStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -20,6 +21,14 @@ const quoteSchema = z.object({
 });
 
 type QuoteFormData = z.infer<typeof quoteSchema>;
+
+const apartmentOptions = [
+  { value: '', label: 'Chọn loại căn hộ' },
+  { value: '1-phong-ngu', label: 'Căn hộ 1 phòng ngủ' },
+  { value: '2-phong-ngu', label: 'Căn hộ 2 phòng ngủ' },
+  { value: '3-phong-ngu', label: 'Căn hộ 3 phòng ngủ' },
+  { value: 'penthouse', label: 'Penthouse' },
+];
 
 export function ContactSection() {
   const { isSubmitting, isSubmitted, submitQuote, reset } = useQuoteStore();
@@ -45,7 +54,7 @@ export function ContactSection() {
   return (
     <section id="contact" className="py-20 md:py-28 bg-gradient-to-br from-primary/5 to-primary/10">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left - Info */}
           <div>
             <FadeInUp>
@@ -55,60 +64,48 @@ export function ContactSection() {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
                 Đăng Ký Nhận Báo Giá
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg text-gray-600 mb-10">
                 Điền thông tin để nhận tư vấn và báo giá chi tiết về dự án Sola Đảo Ảnh Dương
               </p>
             </FadeInUp>
 
             <FadeInUp delay={0.2}>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">📞</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Hotline</h3>
-                    <p className="text-gray-600">0909 123 456</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">✉️</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">info@sola.vn</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">📍</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Địa chỉ</h3>
-                    <p className="text-gray-600">Đường Đại Lộ Võ Văn Kiệt, Quận 7, TP. HCM</p>
-                  </div>
-                </div>
+              <div className="space-y-4">
+                <ContactInfoItem
+                  icon={<Phone className="w-5 h-5" />}
+                  title="Hotline"
+                  value="0909 123 456"
+                  href="tel:0909123456"
+                />
+                <ContactInfoItem
+                  icon={<Mail className="w-5 h-5" />}
+                  title="Email"
+                  value="info@sola.vn"
+                  href="mailto:info@sola.vn"
+                />
+                <ContactInfoItem
+                  icon={<MapPin className="w-5 h-5" />}
+                  title="Địa chỉ"
+                  value="Đường Đại Lộ Võ Văn Kiệt, Quận 7, TP. HCM"
+                />
               </div>
             </FadeInUp>
           </div>
 
           {/* Right - Form */}
           <FadeInUp delay={0.3}>
-            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl">
+            <div className="bg-white p-6 md:p-10 rounded-2xl shadow-soft-lg">
               {isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
+                  className="text-center py-8"
                 >
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle className="w-10 h-10 text-green-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">Gửi Thành Công!</h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 mb-8 max-w-sm mx-auto">
                     Cảm ơn bạn đã quan tâm đến dự án. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.
                   </p>
                   <Button onClick={reset} variant="outline">
@@ -116,29 +113,26 @@ export function ContactSection() {
                   </Button>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                   <div>
                     <Label htmlFor="fullName">Họ và tên *</Label>
                     <Input
                       id="fullName"
                       placeholder="Nhập họ và tên"
+                      error={errors.fullName?.message}
                       {...register('fullName')}
                     />
-                    {errors.fullName && (
-                      <p className="text-sm text-red-500 mt-1">{errors.fullName.message}</p>
-                    )}
                   </div>
 
                   <div>
                     <Label htmlFor="phone">Số điện thoại *</Label>
                     <Input
                       id="phone"
+                      type="tel"
                       placeholder="Nhập số điện thoại"
+                      error={errors.phone?.message}
                       {...register('phone')}
                     />
-                    {errors.phone && (
-                      <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
-                    )}
                   </div>
 
                   <div>
@@ -147,35 +141,27 @@ export function ContactSection() {
                       id="email"
                       type="email"
                       placeholder="Nhập email (tùy chọn)"
+                      error={errors.email?.message}
                       {...register('email')}
                     />
-                    {errors.email && (
-                      <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
-                    )}
                   </div>
 
                   <div>
                     <Label htmlFor="apartment">Căn hộ quan tâm</Label>
-                    <select
+                    <Select
                       id="apartment"
-                      className="flex h-11 w-full rounded-lg border border-input bg-background px-4 py-2 text-sm"
+                      options={apartmentOptions}
+                      error={errors.apartment?.message}
                       {...register('apartment')}
-                    >
-                      <option value="">Chọn loại căn hộ</option>
-                      <option value="1-phong-ngu">Căn hộ 1 phòng ngủ</option>
-                      <option value="2-phong-ngu">Căn hộ 2 phòng ngủ</option>
-                      <option value="3-phong-ngu">Căn hộ 3 phòng ngủ</option>
-                      <option value="penthouse">Penthouse</option>
-                    </select>
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="message">Lời nhắn</Label>
-                    <textarea
+                    <Textarea
                       id="message"
                       rows={4}
                       placeholder="Nhập lời nhắn của bạn (tùy chọn)"
-                      className="flex w-full rounded-lg border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       {...register('message')}
                     />
                   </div>
@@ -184,20 +170,19 @@ export function ContactSection() {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={isSubmitting}
+                    loading={isSubmitting}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Đang gửi...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-5 h-5 mr-2" />
-                        Gửi Yêu Cầu
-                      </>
-                    )}
+                    <Send className="w-5 h-5 mr-2" />
+                    Gửi Yêu Cầu
                   </Button>
+
+                  <p className="text-xs text-center text-gray-400">
+                    Bằng việc gửi yêu cầu, bạn đồng ý với{' '}
+                    <a href="#contact" className="text-primary hover:underline">
+                      chính sách bảo mật
+                    </a>{' '}
+                    của chúng tôi.
+                  </p>
                 </form>
               )}
             </div>
@@ -205,5 +190,35 @@ export function ContactSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function ContactInfoItem({
+  icon,
+  title,
+  value,
+  href,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  href?: string;
+}) {
+  return (
+    <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+      <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 text-primary">
+        {icon}
+      </div>
+      <div>
+        <p className="text-sm text-gray-500 mb-0.5">{title}</p>
+        {href ? (
+          <a href={href} className="font-medium text-gray-900 hover:text-primary transition-colors">
+            {value}
+          </a>
+        ) : (
+          <p className="font-medium text-gray-900">{value}</p>
+        )}
+      </div>
+    </div>
   );
 }

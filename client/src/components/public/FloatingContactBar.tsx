@@ -43,7 +43,7 @@ export function FloatingContactBar() {
   };
 
   // If no contacts from API, show default
-  const displayContacts = contacts.length > 0 ? contacts : [
+  const displayContacts = (contacts && contacts.length > 0) ? contacts : [
     { _id: '1', type: 'phone' as const, label: 'Hotline', value: '0909123456', icon: '', isActive: true, sortOrder: 1 },
     { _id: '2', type: 'zalo' as const, label: 'Zalo', value: '0909123456', icon: '', isActive: true, sortOrder: 2 },
     { _id: '3', type: 'quote' as const, label: 'Báo giá', value: '', icon: '', isActive: true, sortOrder: 3 },

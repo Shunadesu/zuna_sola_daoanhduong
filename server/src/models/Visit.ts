@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IVisit extends Document {
   ip: string;
@@ -18,4 +18,6 @@ const VisitSchema = new Schema({
 VisitSchema.index({ ip: 1, createdAt: -1 });
 VisitSchema.index({ createdAt: -1 });
 
-export const Visit = mongoose.model<IVisit>('Visit', VisitSchema);
+export const Visit: Model<IVisit> = mongoose.model<IVisit>('Visit', VisitSchema);
+export type { IVisit };
+export default Visit;

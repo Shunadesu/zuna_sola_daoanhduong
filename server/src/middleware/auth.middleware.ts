@@ -11,6 +11,8 @@ export interface JwtPayload {
   username: string;
 }
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
@@ -37,7 +39,6 @@ export const authMiddleware = (
   }
 
   const token = parts[1];
-  const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;

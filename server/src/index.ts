@@ -8,14 +8,14 @@ import {
   authRoutes, 
   bannerRoutes, 
   quoteRoutes, 
-  contactRoutes, 
+  contactRoutes,
   statsRoutes,
+  trackRoutes,
   bannerAdminRoutes,
   contactAdminRoutes,
   quoteAdminRoutes
 } from './routes/index.js';
 import uploadRoutes from './routes/upload.routes.js';
-import { trackVisit } from './middleware/index.js';
 
 dotenv.config();
 
@@ -26,21 +26,21 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: CLIENT_URL,
+  origin: true,
   credentials: true
 }));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Visit tracking for public routes
-app.use('/api', trackVisit);
-
 // Public Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/contacts', contactRoutes);
+
+// Track page views (from frontend client)
+app.use('/api/track', trackRoutes);
 
 // Admin Routes (protected)
 app.use('/api/admin/banners', bannerAdminRoutes);

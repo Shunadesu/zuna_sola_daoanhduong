@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type QuoteStatus = 'new' | 'contacted' | 'closed';
+type QuoteStatus = 'new' | 'contacted' | 'closed';
 
 export interface IQuote extends Document {
   fullName: string;
@@ -28,4 +28,7 @@ const QuoteSchema = new Schema({
 
 QuoteSchema.index({ status: 1, createdAt: -1 });
 
-export const Quote = mongoose.model<IQuote>('Quote', QuoteSchema);
+export const Quote: Model<IQuote> = mongoose.model<IQuote>('Quote', QuoteSchema);
+export type { IQuote };
+export type { QuoteStatus };
+export default Quote;

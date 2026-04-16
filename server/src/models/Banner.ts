@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IBanner extends Document {
   title: string;
@@ -22,4 +22,6 @@ const BannerSchema = new Schema({
 
 BannerSchema.index({ isActive: 1, sortOrder: 1 });
 
-export const Banner = mongoose.model<IBanner>('Banner', BannerSchema);
+export const Banner: Model<IBanner> = mongoose.model<IBanner>('Banner', BannerSchema);
+export type { IBanner };
+export default Banner;

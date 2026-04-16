@@ -5,7 +5,7 @@ import { Admin, Banner, Contact } from '../src/models/index.js';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/sola-apartment';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://sola:sola_sunny@cluster0.vdepymi.mongodb.net/?appName=Cluster0';
 
 const seedAdmin = async () => {
   const existingAdmin = await Admin.findOne({ username: 'admin' });

@@ -21,6 +21,11 @@ export const quoteApi = {
   submit: (data: QuoteFormData) => api.post('/api/quotes', data),
 };
 
+export const trackApi = {
+  pageview: (page: string, referrer?: string) =>
+    api.post('/api/track/pageview', { page, referrer }),
+};
+
 export interface QuoteFormData {
   fullName: string;
   phone: string;
