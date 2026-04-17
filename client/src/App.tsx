@@ -13,7 +13,7 @@ const SITE_CONFIG = {
   url: 'https://sola.vn',
   phone: '0909 123 456',
   email: 'info@sola.vn',
-  address: 'Đường Đại Lộ Võ Văn Kiệt, Quận 7, TP. Hồ Chí Minh',
+  address: 'Công ty cố phần đầu từ Địa Ốc Việt Nam Property Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi, Quận 2, TP. Hồ Chí Minh',
   ogImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80',
 };
 

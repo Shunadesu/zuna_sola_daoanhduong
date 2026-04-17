@@ -1,6 +1,6 @@
 import { Phone, Mail, MapPin, Facebook, MessageCircle, Building2 } from 'lucide-react';
 
-const ADDRESS = 'Đường Đại Lộ Võ Văn Kiệt, Quận 7, TP. Hồ Chí Minh';
+const ADDRESS = 'Công ty cố phần đầu từ Địa Ốc Việt Nam Property Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi, Quận 2, TP. Hồ Chí Minh';
 const MAP_IMAGE = 'https://masterisevietnam.com/wp-content/uploads/2025/08/vi-tri-sola-global-city.jpg';
 const LOGO_IMAGE = '/SOLA-dao-anh-duong-scaled.png';
 

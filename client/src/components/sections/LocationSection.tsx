@@ -94,7 +94,7 @@ export function LocationSection() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Địa chỉ</h3>
-                    <p className="text-gray-600 text-sm">Đường Đại Lộ Võ Văn Kiệt, Quận 7, TP. Hồ Chí Minh</p>
+                    <p className="text-gray-600 text-sm">Công ty cố phần đầu từ Địa Ốc Việt Nam Property Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi, Quận 2, TP. Hồ Chí Minh</p>
                   </div>
                 </div>
               </StaggerItem>
