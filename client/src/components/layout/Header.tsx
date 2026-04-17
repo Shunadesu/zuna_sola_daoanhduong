@@ -62,7 +62,6 @@ export function Header() {
     ? 'bg-white/95 backdrop-blur-md shadow-sm'
     : 'bg-transparent';
   const textColor = isScrolled ? 'text-gray-800' : 'text-white';
-  const subTextColor = isScrolled ? 'text-gray-500' : 'text-white/80';
   const mobileBtnColor = isScrolled ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10';
 
   return (

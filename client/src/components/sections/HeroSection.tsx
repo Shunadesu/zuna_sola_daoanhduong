@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { bannerApi } from '@/lib/api';
 import type { Banner } from '@/lib/api';
 import 'swiper/css';

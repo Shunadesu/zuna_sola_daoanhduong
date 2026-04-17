@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Send, CheckCircle, Phone, Mail } from 'lucide-react';
-import { FadeInUp } from '@/components/animated';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui';
 import { Label } from '@/components/ui';
