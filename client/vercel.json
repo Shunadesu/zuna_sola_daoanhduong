@@ -3,12 +3,11 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "port": 4888,
   "env": {
-    "VITE_API_URL": "@sola-api-url"
+    "VITE_API_URL": "https://sunnydemo.site"
   },
-  "regions": ["sin1"],
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://sola-api.vercel.app/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://sunnydemo.site/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
