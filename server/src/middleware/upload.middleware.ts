@@ -41,12 +41,12 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
   }
 };
 
-// Create upload instance - 5MB max, 10 files max
+// Create upload instance - 50MB max, 10 files max
 export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 50 * 1024 * 1024, // 50MB
     files: 10
   }
 });

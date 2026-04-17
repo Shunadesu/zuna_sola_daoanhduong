@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-type ContactType = 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'quote';
+type ContactType = 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'email' | 'address' | 'quote';
 
 export interface IContact extends Document {
   type: ContactType;
@@ -16,7 +16,7 @@ export interface IContact extends Document {
 const ContactSchema = new Schema({
   type: { 
     type: String, 
-    enum: ['phone', 'whatsapp', 'zalo', 'facebook', 'quote'], 
+    enum: ['phone', 'whatsapp', 'zalo', 'facebook', 'email', 'address', 'quote'], 
     required: true 
   },
   label: { type: String, required: true },

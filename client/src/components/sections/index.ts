@@ -1,5 +1,6 @@
 export { HeroSection } from './HeroSection';
-export { AboutSection } from './AboutSection';
+export { OverviewSection } from './OverviewSection';
+export { LocationAdvantageSection } from './LocationAdvantageSection';
 export { LocationSection } from './LocationSection';
 export { AmenitiesSection } from './AmenitiesSection';
 export { GallerySection } from './GallerySection';

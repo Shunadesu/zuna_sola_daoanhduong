@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { Header, Footer, SmoothScroll } from '@/components/layout';
 import { FloatingContactBar } from '@/components/public';
-import { HeroSection, AboutSection, LocationSection, AmenitiesSection, GallerySection, ContactSection } from '@/components/sections';
+import { HeroSection, OverviewSection, LocationAdvantageSection, LocationSection, AmenitiesSection, GallerySection, ContactSection } from '@/components/sections';
 import { trackApi } from '@/lib/api';
 
 const SITE_CONFIG = {
@@ -63,8 +63,8 @@ function Home() {
       </Helmet>
 
       <HeroSection />
-      <AboutSection />
-      <LocationSection />
+      <LocationAdvantageSection />
+      <OverviewSection />
       <AmenitiesSection />
       <GallerySection />
       <ContactSection />

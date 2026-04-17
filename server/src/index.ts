@@ -13,7 +13,13 @@ import {
   trackRoutes,
   bannerAdminRoutes,
   contactAdminRoutes,
-  quoteAdminRoutes
+  quoteAdminRoutes,
+  overviewAdminRoutes,
+  overviewRoutes,
+  amenityRoutes,
+  amenityAdminRoutes,
+  galleryRoutes,
+  galleryAdminRoutes
 } from './routes/index.js';
 import uploadRoutes from './routes/upload.routes.js';
 
@@ -38,6 +44,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/contacts', contactRoutes);
+app.use('/api/overviews', overviewRoutes);
+app.use('/api/amenities', amenityRoutes);
+app.use('/api/galleries', galleryRoutes);
 
 // Track page views (from frontend client)
 app.use('/api/track', trackRoutes);
@@ -46,6 +55,9 @@ app.use('/api/track', trackRoutes);
 app.use('/api/admin/banners', bannerAdminRoutes);
 app.use('/api/admin/quotes', quoteAdminRoutes);
 app.use('/api/admin/contacts', contactAdminRoutes);
+app.use('/api/admin/overviews', overviewAdminRoutes);
+app.use('/api/admin/amenities', amenityAdminRoutes);
+app.use('/api/admin/galleries', galleryAdminRoutes);
 app.use('/api/admin/stats', statsRoutes);
 
 // Upload Routes

@@ -5,9 +5,13 @@ import { authMiddleware, AuthRequest } from '../middleware/index.js';
 const router = Router();
 
 // Public routes
-router.get('/', async (_req, res: Response) => {
+router.get('/', async (req, res: Response) => {
   try {
-    const contacts = await Contact.find({ isActive: true })
+    const { type } = req.query;
+    const filter: { isActive: boolean; type?: string } = { isActive: true };
+    if (type) filter.type = type as string;
+    
+    const contacts = await Contact.find(filter)
       .sort({ sortOrder: 1, createdAt: -1 });
     res.json({ success: true, data: contacts });
   } catch (error) {
@@ -36,7 +40,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const validTypes = ['phone', 'whatsapp', 'zalo', 'facebook', 'quote'];
+    const validTypes = ['phone', 'whatsapp', 'zalo', 'facebook', 'email', 'address', 'quote'];
     if (!validTypes.includes(type)) {
       res.status(400).json({ success: false, message: 'Invalid contact type' });
       return;
@@ -64,7 +68,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
     const { type, label, value, icon, isActive, sortOrder } = req.body;
 
     if (type) {
-      const validTypes = ['phone', 'whatsapp', 'zalo', 'facebook', 'quote'];
+      const validTypes = ['phone', 'whatsapp', 'zalo', 'facebook', 'email', 'address', 'quote'];
       if (!validTypes.includes(type)) {
         res.status(400).json({ success: false, message: 'Invalid contact type' });
         return;

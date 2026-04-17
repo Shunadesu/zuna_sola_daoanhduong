@@ -9,6 +9,9 @@ import Dashboard from '@/pages/Dashboard';
 import BannerManager from '@/pages/BannerManager';
 import ContactManager from '@/pages/ContactManager';
 import QuoteManager from '@/pages/QuoteManager';
+import OverviewManager from '@/pages/OverviewManager';
+import AmenityManager from '@/pages/AmenityManager';
+import GalleryManager from '@/pages/GalleryManager';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -40,6 +43,9 @@ function App() {
             <Route path="/banners" element={<BannerManager />} />
             <Route path="/contacts" element={<ContactManager />} />
             <Route path="/quotes" element={<QuoteManager />} />
+            <Route path="/overviews" element={<OverviewManager />} />
+            <Route path="/amenities" element={<AmenityManager />} />
+            <Route path="/galleries" element={<GalleryManager />} />
           </Route>
           
           <Route path="*" element={<Navigate to="/" replace />} />

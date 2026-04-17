@@ -21,9 +21,11 @@ import {
   FileText,
   Search,
   X,
+  Mail,
+  MapPin,
 } from 'lucide-react';
 
-type ContactType = 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'quote';
+type ContactType = 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'email' | 'address' | 'quote';
 
 interface Contact {
   _id: string;
@@ -40,6 +42,8 @@ const contactIcons: Record<ContactType, React.ReactNode> = {
   whatsapp: <MessageCircle className="w-4 h-4" />,
   zalo: <span className="text-xs font-bold">Zalo</span>,
   facebook: <Facebook className="w-4 h-4" />,
+  email: <Mail className="w-4 h-4" />,
+  address: <MapPin className="w-4 h-4" />,
   quote: <FileText className="w-4 h-4" />,
 };
 
@@ -48,6 +52,8 @@ const contactTypeLabels: Record<ContactType, string> = {
   whatsapp: 'WhatsApp',
   zalo: 'Zalo',
   facebook: 'Facebook',
+  email: 'Email',
+  address: 'Địa chỉ',
   quote: 'Báo giá',
 };
 
@@ -237,7 +243,7 @@ export default function ContactManager() {
                   {paginated.map((contact) => (
                     <tr key={contact._id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary">
+                        <div className="flex items-center justify-center w-9 h-9 rounded-lg btn-gold-shimmer /10 text-primary">
                           {contactIcons[contact.type]}
                         </div>
                       </td>
@@ -301,6 +307,8 @@ export default function ContactManager() {
               onChange={(v) => setFormData({ ...formData, type: v as ContactType })}
               options={[
                 { value: 'phone', label: 'Điện thoại' },
+                { value: 'email', label: 'Email' },
+                { value: 'address', label: 'Địa chỉ' },
                 { value: 'whatsapp', label: 'WhatsApp' },
                 { value: 'zalo', label: 'Zalo' },
                 { value: 'facebook', label: 'Facebook' },
@@ -324,7 +332,10 @@ export default function ContactManager() {
 
           <div className="space-y-2">
             <Label htmlFor="value">
-              {formData.type === 'quote' ? 'Giá trị' : 'Số điện thoại / URL'}
+              {formData.type === 'quote' ? 'Giá trị' :
+               formData.type === 'email' ? 'Địa chỉ Email' :
+               formData.type === 'address' ? 'Địa chỉ' :
+               'Số điện thoại / URL'}
             </Label>
             <Input
               id="value"
@@ -333,6 +344,10 @@ export default function ContactManager() {
               placeholder={
                 formData.type === 'quote'
                   ? '#quote'
+                  : formData.type === 'email'
+                  ? 'email@example.com'
+                  : formData.type === 'address'
+                  ? '123 Đường ABC, Quận 1, TP.HCM'
                   : formData.type === 'facebook'
                   ? 'https://facebook.com/...'
                   : '0909123456'

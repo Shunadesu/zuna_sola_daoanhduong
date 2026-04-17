@@ -47,6 +47,24 @@ export const bannerPublicApi = {
   getActive: () => api.get('/api/banners'),
 };
 
+// Upload API
+export const uploadApi = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/api/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  uploadImages: (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('images', file));
+    return api.post('/api/upload-multiple', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
 // Banner API - Admin
 export const bannerApi = {
   getAll: () => api.get('/api/admin/banners'),
@@ -107,7 +125,7 @@ export interface QuoteFormData {
 }
 
 export interface ContactFormData {
-  type: 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'quote';
+  type: 'phone' | 'whatsapp' | 'zalo' | 'facebook' | 'email' | 'address' | 'quote';
   label: string;
   value: string;
   icon?: string;

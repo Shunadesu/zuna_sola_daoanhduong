@@ -1,76 +1,86 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FadeInUp, StaggerContainer, StaggerItem } from '@/components/animated';
-import {
-  Waves,
-  Dumbbell,
-  Baby,
-  ShoppingBag,
-  Trees,
-  Shield,
-  Car,
-  Footprints,
-  Trophy,
-  FlowerIcon,
-  IceCream,
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { amenityApi } from '@/lib/api';
 
-const amenityIcons: Record<string, React.ReactNode> = {
-  '🏊': <Waves className="w-7 h-7" />,
-  '🏋️': <Dumbbell className="w-7 h-7" />,
-  '🎾': <Trophy className="w-7 h-7" />,
-  '🧒': <Baby className="w-7 h-7" />,
-  '🛒': <ShoppingBag className="w-7 h-7" />,
-  '🌳': <Trees className="w-7 h-7" />,
-  '🔒': <Shield className="w-7 h-7" />,
-  '🚗': <Car className="w-7 h-7" />,
-  '🏃': <Footprints className="w-7 h-7" />,
-  '⚽': <Trophy className="w-7 h-7" />,
-  '🌺': <FlowerIcon className="w-7 h-7" />,
-  '🍦': <IceCream className="w-7 h-7" />,
-};
-
-interface AmenityItem {
-  icon: string;
-  title: string;
-  description: string;
-  category: string;
+interface AmenityImage {
+  imageUrl: string;
+  sortOrder: number;
 }
 
-const amenities: AmenityItem[] = [
-  { icon: '🏊', title: 'Hồ bơi', description: 'Hồ bơi vô cực view thành phố', category: 'tiện ích' },
-  { icon: '🏋️', title: 'Phòng gym', description: 'Trang thiết bị hiện đại 24/7', category: 'tiện ích' },
-  { icon: '🎾', title: 'Sân tennis', description: 'Sân tennis tiêu chuẩn quốc tế', category: 'giải trí' },
-  { icon: '🧒', title: 'Khu vui chơi', description: 'Khu vui chơi trẻ em an toàn', category: 'tiện ích' },
-  { icon: '🛒', title: 'Trung tâm thương mại', description: 'Shophouse tiện lợi ngay tại dự án', category: 'tiện ích' },
-  { icon: '🌳', title: 'Công viên', description: 'Không gian xanh mát rộng 2.000m²', category: 'tiện ích' },
-  { icon: '🔒', title: 'Bảo vệ 24/7', description: 'Hệ thống an ninh thông minh', category: 'an ninh' },
-  { icon: '🚗', title: 'Bãi đỗ xe', description: 'Hầm đỗ xe thông minh', category: 'tiện ích' },
-  { icon: '🏃', title: 'Đường chạy bộ', description: 'Đường dạo quanh dự án 500m', category: 'giải trí' },
-  { icon: '⚽', title: 'Sân bóng đá', description: 'Sân bóng mini tiêu chuẩn', category: 'giải trí' },
-  { icon: '🌺', title: 'Sky garden', description: 'Vườn trên cao view thành phố', category: 'tiện ích' },
-  { icon: '🍦', title: 'Khu BBQ', description: 'Khu vực nướng BBQ ngoài trời', category: 'giải trí' },
-];
-
-const categoryTabs = [
-  { id: 'all', label: 'Tất cả' },
-  { id: 'tiện ích', label: 'Cơ sở vật chất' },
-  { id: 'giải trí', label: 'Giải trí' },
-  { id: 'an ninh', label: 'An ninh' },
-];
+interface Amenity {
+  _id: string;
+  name: string;
+  images: AmenityImage[];
+  description: string;
+  isActive: boolean;
+  sortOrder: number;
+}
 
 export function AmenitiesSection() {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [amenities, setAmenities] = useState<Amenity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const filteredAmenities =
-    activeCategory === 'all'
-      ? amenities
-      : amenities.filter((a) => a.category === activeCategory);
+  useEffect(() => {
+    const fetchAmenities = async () => {
+      try {
+        const res = await amenityApi.getActive();
+        if (res.data?.success) {
+          setAmenities(res.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch amenities:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAmenities();
+  }, []);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [activeTab]);
+
+  const activeAmenity = amenities[activeTab];
+  const images = activeAmenity?.images || [];
+  const hasMultipleImages = images.length > 1;
+
+  if (isLoading) {
+    return (
+      <section id="amenities" className="py-20 md:py-28 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+              Tiện ích
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              Tiện Ích Đẳng Cấp
+            </h2>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="aspect-[16/9] bg-gray-100 rounded-2xl animate-pulse" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (amenities.length === 0) {
+    return null;
+  }
 
   return (
     <section id="amenities" className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
-        <FadeInUp className="text-center mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
           <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
             Tiện ích
           </span>
@@ -80,47 +90,110 @@ export function AmenitiesSection() {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Hệ thống tiện ích đồng bộ, mang đến cuộc sống tiện nghi cho cư dân
           </p>
-        </FadeInUp>
+        </motion.div>
 
-        {/* Category Tabs */}
-        <div className="flex justify-center mb-12">
-          <div className="flex gap-2 p-1 bg-gray-100 rounded-xl overflow-x-auto">
-            {categoryTabs.map((tab) => (
+        {/* Tabs */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-gray-100 rounded-full p-1 gap-1">
+            {amenities.map((amenity, index) => (
               <button
-                key={tab.id}
-                onClick={() => setActiveCategory(tab.id)}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  activeCategory === tab.id
-                    ? 'bg-white text-primary shadow-sm'
+                key={amenity._id}
+                onClick={() => setActiveTab(index)}
+                className={`
+                  px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300
+                  ${activeTab === index
+                    ? 'bg-white text-gray-900 shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }
+                `}
               >
-                {tab.label}
+                {amenity.name}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Amenities Grid */}
-        <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {filteredAmenities.map((amenity) => (
-            <StaggerItem key={amenity.title}>
-              <motion.div
-                whileHover={{ y: -6, boxShadow: '0 16px 32px rgba(0,0,0,0.1)' }}
-                className="group p-5 md:p-6 bg-gray-50 rounded-2xl text-center h-full flex flex-col items-center cursor-default"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors duration-300"
-                >
-                  {amenityIcons[amenity.icon] || <span className="text-3xl">{amenity.icon}</span>}
-                </motion.div>
-                <h3 className="font-semibold text-gray-900 mb-1.5 text-sm md:text-base">{amenity.title}</h3>
-                <p className="text-xs md:text-sm text-gray-500 leading-relaxed">{amenity.description}</p>
-              </motion.div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+        {/* Image Carousel */}
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-5xl mx-auto"
+        >
+          <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-xl bg-gray-100">
+            {images.length > 0 ? (
+              <>
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={activeImageIndex}
+                    src={images[activeImageIndex].imageUrl}
+                    alt={activeAmenity?.name}
+                    className="w-full h-full object-cover"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </AnimatePresence>
+
+                {/* Navigation Arrows */}
+                {hasMultipleImages && (
+                  <>
+                    <button
+                      onClick={() => setActiveImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+                    >
+                      <ChevronLeft className="w-6 h-6 text-gray-700" />
+                    </button>
+                    <button
+                      onClick={() => setActiveImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+                    >
+                      <ChevronRight className="w-6 h-6 text-gray-700" />
+                    </button>
+
+                    {/* Dots */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                      {images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setActiveImageIndex(index)}
+                          className={`
+                            w-2.5 h-2.5 rounded-full transition-all
+                            ${activeImageIndex === index ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/80'}
+                          `}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <p>Chưa có hình ảnh</p>
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
+          <motion.div
+            key={`desc-${activeTab}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-center mt-6"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              {activeAmenity?.name}
+            </h3>
+            {activeAmenity?.description && (
+              <p className="text-gray-600 max-w-xl mx-auto">
+                {activeAmenity.description}
+              </p>
+            )}
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

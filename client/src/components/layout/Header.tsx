@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAppStore } from '@/store';
+import { contactApi } from '@/lib/api';
 
 const navLinks = [
   { href: '#home', label: 'Trang chủ' },
-  { href: '#about', label: 'Giới thiệu' },
   { href: '#location', label: 'Vị trí' },
+  { href: '#overview', label: 'Tổng thể' },
   { href: '#amenities', label: 'Tiện ích' },
   { href: '#gallery', label: 'Hình ảnh' },
   { href: '#contact', label: 'Liên hệ' },
@@ -16,7 +16,8 @@ const navLinks = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isMenuOpen, toggleMenu, closeMenu } = useAppStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('0909123456');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,27 +28,42 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    if (isMenuOpen) {
+    const fetchPhone = async () => {
+      try {
+        const res = await contactApi.getByType('phone');
+        if (res.data?.data?.length > 0) {
+          setPhoneNumber(res.data.data[0].value);
+        }
+      } catch (error) {
+        console.error('Failed to fetch phone number:', error);
+      }
+    };
+    fetchPhone();
+  }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [isMenuOpen]);
+  }, [isMobileMenuOpen]);
 
   const handleNavClick = (href: string) => {
-    closeMenu();
+    setIsMobileMenuOpen(false);
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const headerBg = isScrolled
+  const isScrolledStyle = isScrolled
     ? 'bg-white/95 backdrop-blur-md shadow-sm'
     : 'bg-transparent';
   const textColor = isScrolled ? 'text-gray-800' : 'text-white';
-  const subColor = isScrolled ? 'text-gray-500' : 'text-white/80';
+  const subTextColor = isScrolled ? 'text-gray-500' : 'text-white/80';
+  const mobileBtnColor = isScrolled ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10';
 
   return (
     <>
@@ -56,10 +72,10 @@ export function Header() {
         animate={{ y: 0 }}
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-          headerBg
+          isScrolledStyle
         )}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link
@@ -67,15 +83,14 @@ export function Header() {
               className="flex items-center gap-2"
               onClick={() => handleNavClick('#home')}
             >
-              <div className={cn('font-bold text-2xl transition-colors', textColor)}>
-                SOLA
-              </div>
-              <div className={cn('text-xs transition-colors', subColor)}>
-                Đảo Ảnh Dương
-              </div>
+              <img 
+                src="/SOLA-dao-anh-duong-scaled.png" 
+                alt="SOLA Đảo Ảnh Dương"
+                className="h-10 md:h-12 w-auto object-contain"
+              />
             </Link>
 
-            {/* Desktop Nav */}
+            {/* Desktop Navigation - Hidden on mobile */}
             <nav className="hidden lg:flex items-center gap-8" role="navigation" aria-label="Main navigation">
               {navLinks.map((link) => (
                 <button
@@ -90,47 +105,44 @@ export function Header() {
                 </button>
               ))}
               <a
-                href="tel:0909123456"
-                className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full hover:bg-primary/90 transition-all shadow-sm hover:shadow-md"
+                href={`tel:${phoneNumber}`}
+                className="btn-gold-shimmer flex items-center gap-2 text-white px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md"
               >
                 <Phone className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">Liên hệ ngay</span>
               </a>
             </nav>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Only visible on mobile */}
             <button
-              onClick={toggleMenu}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={cn(
-                'p-2 rounded-lg transition-colors',
-                isScrolled ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                'lg:hidden p-2 rounded-lg transition-colors',
+                mobileBtnColor
               )}
-              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={isMenuOpen}
+              aria-label={isMobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
+              aria-expanded={isMobileMenuOpen}
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </motion.header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay - Only visible when open */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-white pt-20"
+            className="fixed inset-0 z-40 bg-white pt-20 lg:hidden"
             role="dialog"
             aria-modal="true"
-            aria-label="Mobile navigation"
+            aria-label="Menu di động"
           >
-            {/* Backdrop blur overlay */}
-            <div className="absolute inset-0 bg-white/95 backdrop-blur-md" />
-
-            <nav className="relative z-10 flex flex-col items-center gap-2 p-6 pt-8">
+            <nav className="flex flex-col items-center gap-2 p-6 pt-8">
               {navLinks.map((link, index) => (
                 <motion.button
                   key={link.href}
@@ -150,8 +162,8 @@ export function Header() {
                 className="mt-6 w-full max-w-xs"
               >
                 <a
-                  href="tel:0909123456"
-                  className="flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg hover:shadow-xl transition-all"
+                  href={`tel:${phoneNumber}`}
+                  className="btn-gold-shimmer flex items-center justify-center gap-2 text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg hover:shadow-xl transition-shadow"
                 >
                   <Phone className="w-5 h-5" aria-hidden="true" />
                   Liên hệ ngay

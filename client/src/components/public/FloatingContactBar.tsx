@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, MessageCircle, FileText, X } from 'lucide-react';
+import { Phone, MessageCircle, FileText, X, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useContactStore } from '@/store';
+import { bannerApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 const contactIcons: Record<string, { icon: React.ReactNode; bg: string; href?: string }> = {
   phone: { icon: <Phone className="w-5 h-5" />, bg: 'bg-red-500 hover:bg-red-600' },
@@ -12,13 +14,191 @@ const contactIcons: Record<string, { icon: React.ReactNode; bg: string; href?: s
   quote: { icon: <FileText className="w-5 h-5" />, bg: 'bg-amber-500 hover:bg-amber-600' },
 };
 
+interface QuoteModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function QuoteModal({ open, onClose }: QuoteModalProps) {
+  const [banners, setBanners] = useState<string[]>([]);
+  const [bgImage, setBgImage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+  });
+
+  useEffect(() => {
+    if (open) {
+      fetchBanners();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (banners.length > 0) {
+      const randomIndex = Math.floor(Math.random() * banners.length);
+      setBgImage(banners[randomIndex]);
+    }
+  }, [banners]);
+
+  const fetchBanners = async () => {
+    try {
+      const res = await bannerApi.getActive();
+      if (res.data?.success && res.data.data?.length > 0) {
+        const urls = res.data.data.map((b: { imageUrl: string }) => b.imageUrl);
+        setBanners(urls);
+      }
+    } catch (error) {
+      console.error('Failed to fetch banners:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullName || !formData.phone) {
+      toast.error('Vui lòng nhập họ tên và số điện thoại');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
+        setFormData({ fullName: '', phone: '' });
+        onClose();
+      } else {
+        toast.error(data.message || 'Có lỗi xảy ra');
+      }
+    } catch (error) {
+      toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={onClose}
+        >
+          {/* Backdrop with banner image */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0"
+            onClick={onClose}
+          >
+            {bgImage && (
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${bgImage})` }}
+              />
+            )}
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          </motion.div>
+
+          {/* Modal */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: 'spring', duration: 0.5 }}
+            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-700" />
+            </button>
+
+            {/* Header */}
+            <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-white">
+              <h2 className="text-2xl font-bold mb-2">Đăng Ký Nhận Báo Giá</h2>
+              <p className="text-white/80 text-sm">Điền thông tin để nhận tư vấn chi tiết về dự án</p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Họ và tên *</label>
+                <input
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  placeholder="Nhập họ và tên"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Số điện thoại *</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="Nhập số điện thoại"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-gradient-to-r from-primary to-primary/80 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
+              >
+                {isSubmitting ? (
+                  <span className="animate-spin">⏳</span>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Gửi Yêu Cầu
+                  </>
+                )}
+              </button>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function FloatingContactBar() {
   const { contacts, fetchContacts } = useContactStore();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
 
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
+
+  // Auto-open modal once after 10s on first visit
+  useEffect(() => {
+    const hasShownModal = localStorage.getItem('quote_modal_shown');
+    if (!hasShownModal) {
+      const timer = setTimeout(() => {
+        setShowQuoteModal(true);
+        localStorage.setItem('quote_modal_shown', 'true');
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleClick = (type: string, value: string) => {
     switch (type) {
@@ -42,7 +222,6 @@ export function FloatingContactBar() {
     }
   };
 
-  // If no contacts from API, show default
   const displayContacts = (contacts && contacts.length > 0) ? contacts : [
     { _id: '1', type: 'phone' as const, label: 'Hotline', value: '0909123456', icon: '', isActive: true, sortOrder: 1 },
     { _id: '2', type: 'zalo' as const, label: 'Zalo', value: '0909123456', icon: '', isActive: true, sortOrder: 2 },
@@ -50,53 +229,69 @@ export function FloatingContactBar() {
   ];
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 flex flex-col gap-3">
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="flex flex-col gap-3"
-          >
-            {displayContacts.map((contact, index) => {
-              const iconConfig = contactIcons[contact.type] || contactIcons.quote;
-              return (
-                <motion.button
-                  key={contact._id}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleClick(contact.type, contact.value)}
-                  className={cn(
-                    'w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all',
-                    iconConfig.bg
-                  )}
-                  title={contact.label}
-                >
-                  {iconConfig.icon}
-                </motion.button>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <>
+      <div className="fixed right-4 bottom-4 z-50 flex flex-col gap-3">
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="flex flex-col gap-3"
+            >
+              {displayContacts.map((contact, index) => {
+                const iconConfig = contactIcons[contact.type] || contactIcons.quote;
+                return (
+                  <motion.button
+                    key={contact._id}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleClick(contact.type, contact.value)}
+                    className={cn(
+                      'w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all',
+                      iconConfig.bg
+                    )}
+                    title={contact.label}
+                  >
+                    {iconConfig.icon}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg"
-      >
-        <motion.div
-          animate={{ rotate: isExpanded ? 45 : 0 }}
-          transition={{ duration: 0.2 }}
+        {/* Quote button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowQuoteModal(true)}
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white flex items-center justify-center shadow-lg"
+          title="Đăng ký báo giá"
         >
-          {isExpanded ? <X className="w-6 h-6" /> : <Phone className="w-6 h-6" />}
-        </motion.div>
-      </motion.button>
-    </div>
+          <FileText className="w-6 h-6" />
+        </motion.button>
+
+        {/* Toggle button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg"
+        >
+          <motion.div
+            animate={{ rotate: isExpanded ? 45 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {isExpanded ? <X className="w-6 h-6" /> : <Phone className="w-6 h-6" />}
+          </motion.div>
+        </motion.button>
+      </div>
+
+      <QuoteModal open={showQuoteModal} onClose={() => setShowQuoteModal(false)} />
+    </>
   );
 }

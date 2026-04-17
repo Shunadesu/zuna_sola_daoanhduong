@@ -1,8 +1,28 @@
 import { Router, Response } from 'express';
 import { Banner } from '../../models/index.js';
 import { authMiddleware, AuthRequest } from '../../middleware/index.js';
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
+
+// Helper function to delete uploaded file
+const deleteUploadedFile = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes('/api/uploads/')) return;
+  try {
+    const filename = imageUrl.split('/api/uploads/')[1];
+    if (!filename) return;
+    // Handle full URL or relative path
+    const uploadsDir = path.resolve(process.cwd(), 'uploads');
+    const filePath = path.join(uploadsDir, filename);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`Deleted file: ${filePath}`);
+    }
+  } catch (error) {
+    console.error('Error deleting uploaded file:', error);
+  }
+};
 
 // All routes require authentication
 router.use(authMiddleware);
@@ -50,6 +70,13 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { title, subtitle, imageUrl, linkUrl, isActive, sortOrder } = req.body;
 
+    // Get old banner to check if image changed
+    const oldBanner = await Banner.findById(id);
+    if (!oldBanner) {
+      res.status(404).json({ success: false, message: 'Banner not found' });
+      return;
+    }
+
     const banner = await Banner.findByIdAndUpdate(
       id,
       { title, subtitle, imageUrl, linkUrl, isActive, sortOrder },
@@ -59,6 +86,11 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     if (!banner) {
       res.status(404).json({ success: false, message: 'Banner not found' });
       return;
+    }
+
+    // Delete old image if it was changed and is a local upload
+    if (oldBanner.imageUrl !== imageUrl) {
+      deleteUploadedFile(oldBanner.imageUrl);
     }
 
     res.json({ success: true, data: banner });
@@ -79,6 +111,9 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
       return;
     }
 
+    // Delete the uploaded image file
+    deleteUploadedFile(banner.imageUrl);
+
     res.json({ success: true, message: 'Banner deleted successfully' });
   } catch (error) {
     console.error('Delete banner error:', error);
@@ -86,4 +121,4 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
-export default router;
+export const bannerAdminRoutes = router;

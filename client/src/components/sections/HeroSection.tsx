@@ -3,50 +3,91 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useBannerStore } from '@/store';
-import type { Banner } from '@/store/useBannerStore';
+import { bannerApi } from '@/lib/api';
+import type { Banner } from '@/lib/api';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
+const DEFAULT_BANNERS: Banner[] = [
+  {
+    _id: '1',
+    title: 'Căn Hộ Cao Cấp',
+    subtitle: 'Tại Đảo Ảnh Dương',
+    imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=80',
+    linkUrl: '',
+    isActive: true,
+    sortOrder: 0,
+    createdAt: '',
+  },
+  {
+    _id: '2',
+    title: 'Cuộc Sống Hoàn Hảo',
+    subtitle: 'Vị trí đắc địa, tiện ích đẳng cấp',
+    imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1920&q=80',
+    linkUrl: '',
+    isActive: true,
+    sortOrder: 1,
+    createdAt: '',
+  },
+  {
+    _id: '3',
+    title: 'Đầu Tư Sinh Lời',
+    subtitle: 'Cơ hội sở hữu căn hộ mơ ước',
+    imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80',
+    linkUrl: '',
+    isActive: true,
+    sortOrder: 2,
+    createdAt: '',
+  },
+];
+
 export function HeroSection() {
-  const { banners, fetchBanners } = useBannerStore();
+  const [banners, setBanners] = useState<Banner[]>(DEFAULT_BANNERS);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<any>(null);
 
   useEffect(() => {
     fetchBanners();
-  }, [fetchBanners]);
+  }, []);
 
-  const defaultBanners: Banner[] = (banners && banners.length > 0) ? banners : [
-    {
-      _id: '1',
-      title: 'Căn Hộ Cao Cấp',
-      subtitle: 'Tại Đảo Ảnh Dương',
-      imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=80',
-      linkUrl: '',
-      isActive: true,
-      sortOrder: 0,
-    },
-    {
-      _id: '2',
-      title: 'Cuộc Sống Hoàn Hảo',
-      subtitle: 'Vị trí đắc địa, tiện ích đẳng cấp',
-      imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1920&q=80',
-      linkUrl: '',
-      isActive: true,
-      sortOrder: 1,
-    },
-    {
-      _id: '3',
-      title: 'Đầu Tư Sinh Lời',
-      subtitle: 'Cơ hội sở hữu căn hộ mơ ước',
-      imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80',
-      linkUrl: '',
-      isActive: true,
-      sortOrder: 2,
-    },
-  ];
+  const fetchBanners = async () => {
+    try {
+      const response = await bannerApi.getActive();
+      const data = response.data?.data;
+      if (Array.isArray(data) && data.length > 0) {
+        setBanners(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch banners:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const currentBanners = banners.length > 0 ? banners : DEFAULT_BANNERS;
+
+  if (isLoading) {
+    return (
+      <section className="relative h-screen bg-gray-900 animate-pulse">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+        <div className="absolute inset-0 flex items-center">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="inline-block w-48 h-8 bg-white/10 rounded-full mb-6" />
+              <div className="w-80 md:w-96 h-16 bg-white/10 rounded-lg mx-auto mb-4" />
+              <div className="w-64 h-8 bg-white/10 rounded-lg mx-auto mb-10" />
+              <div className="flex justify-center gap-4">
+                <div className="w-36 h-12 bg-white/10 rounded-full" />
+                <div className="w-36 h-12 bg-white/10 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="home" className="relative h-screen overflow-hidden">
@@ -66,10 +107,9 @@ export function HeroSection() {
         onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
         className="h-full"
       >
-        {defaultBanners.map((banner, index) => (
+        {currentBanners.map((banner, index) => (
           <SwiperSlide key={banner._id}>
             <div className="relative h-full">
-              {/* Background Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-[6000ms] ease-out"
                 style={{
@@ -77,10 +117,8 @@ export function HeroSection() {
                   transform: `scale(${activeIndex === index ? 1.08 : 1})`,
                 }}
               />
-              {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
 
-              {/* Content */}
               <div className="relative h-full flex items-center">
                 <div className="container mx-auto px-4">
                   <AnimatePresence mode="wait">
@@ -91,21 +129,21 @@ export function HeroSection() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -40 }}
                         transition={{ duration: 0.6 }}
-                        className="max-w-2xl"
+                        className="max-w-3xl mx-auto text-center"
                       >
                         <motion.span
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.2 }}
-                          className="inline-block px-4 py-2 bg-primary/90 text-white text-sm rounded-full mb-6"
+                          className="inline-block px-4 py-2 badge-white text-sm rounded-full mb-6 font-medium"
                         >
-                          Dự án cao cấp
+                          Sola Đảo Ánh Dương
                         </motion.span>
                         <motion.h1
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
-                          className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 leading-tight text-balance"
+                          className="text-4xl md:text-5xl lg:text-6xl font-bold text-shimmer-gold mb-4 leading-tight text-balance"
                         >
                           {banner.title}
                         </motion.h1>
@@ -113,11 +151,11 @@ export function HeroSection() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 }}
-                          className="text-xl md:text-2xl text-white/90 mb-10"
+                          className="text-lg md:text-xl italic text-white/90 mb-10"
                         >
                           {banner.subtitle}
                         </motion.p>
-                        <motion.div
+                        {/* <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.5 }}
@@ -125,7 +163,7 @@ export function HeroSection() {
                         >
                           <a
                             href="#contact"
-                            className="px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5"
+                            className="px-8 py-4 bg-white font-semibold rounded-full transition-all shadow-lg  hover:-translate-y-0.5"
                           >
                             Đăng ký ngay
                           </a>
@@ -135,7 +173,7 @@ export function HeroSection() {
                           >
                             Tìm hiểu thêm
                           </a>
-                        </motion.div>
+                        </motion.div> */}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -146,21 +184,6 @@ export function HeroSection() {
         ))}
       </Swiper>
 
-      {/* Navigation Buttons */}
-      <button
-        className="hero-prev absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all hover:scale-110"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-6 h-6" />
-      </button>
-      <button
-        className="hero-next absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all hover:scale-110"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-6 h-6" />
-      </button>
-
-      {/* Scroll Indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

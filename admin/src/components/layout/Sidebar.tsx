@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Image,
+  Trees,
+  GalleryHorizontalEnd,
   Phone,
   FileText,
   ChevronLeft,
@@ -15,6 +17,9 @@ import { useAuthStore } from '@/store/useAuthStore';
 const menuItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/banners', label: 'Banner', icon: Image },
+  { path: '/overviews', label: 'Tổng thể', icon: Image },
+  { path: '/galleries', label: 'Thư viện ảnh', icon: GalleryHorizontalEnd },
+  { path: '/amenities', label: 'Tiện ích', icon: Trees },
   { path: '/contacts', label: 'Liên hệ', icon: Phone },
   { path: '/quotes', label: 'Yêu cầu báo giá', icon: FileText },
 ];
@@ -90,7 +95,7 @@ export function Sidebar({ isCollapsed, onToggle, mobileOpen = false, onMobileClo
         {!isCollapsed && user && (
           <div className="mb-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+              <div className="w-8 h-8 rounded-full btn-gold-shimmer /10 text-primary flex items-center justify-center text-xs font-semibold">
                 {user.username.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">

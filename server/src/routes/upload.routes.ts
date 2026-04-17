@@ -22,11 +22,8 @@ router.post('/upload', upload.single('image'), (req: Request, res: Response) => 
       return;
     }
 
-    // Build URL based on request
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseUrl = `${protocol}://${host}`;
-    const imageUrl = `${baseUrl}/api/uploads/${req.file.filename}`;
+    // Use relative path for the URL so it works regardless of domain
+    const imageUrl = `/api/uploads/${req.file.filename}`;
 
     res.json({
       success: true,
@@ -53,12 +50,8 @@ router.post('/upload-multiple', upload.array('images', 10), (req: Request, res: 
       return;
     }
 
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseUrl = `${protocol}://${host}`;
-
     const uploadedFiles = files.map((file) => ({
-      url: `${baseUrl}/api/uploads/${file.filename}`,
+      url: `/api/uploads/${file.filename}`,
       filename: file.filename,
       originalName: file.originalname,
       size: file.size,
@@ -82,7 +75,7 @@ router.use((err: Error, _req: Request, res: Response, _next: express.NextFunctio
     return;
   }
   if (err.message.includes('File too large')) {
-    res.status(400).json({ success: false, message: 'File quá lớn (tối đa 5MB)' });
+    res.status(400).json({ success: false, message: 'File quá lớn (tối đa 50MB)' });
     return;
   }
   res.status(500).json({ success: false, message: 'Upload error' });

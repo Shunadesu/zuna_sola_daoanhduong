@@ -68,4 +68,4 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
-export default router;
+export const quoteAdminRoutes = router;

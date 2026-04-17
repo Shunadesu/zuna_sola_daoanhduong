@@ -236,7 +236,7 @@ export default function QuoteManager() {
 
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                      <div className="w-10 h-10 rounded-full btn-gold-shimmer /10 text-primary flex items-center justify-center font-semibold">
                         {selectedQuote.fullName.charAt(0).toUpperCase()}
                       </div>
                       <div>

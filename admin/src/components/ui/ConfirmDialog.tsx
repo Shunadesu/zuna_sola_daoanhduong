@@ -30,7 +30,7 @@ export function ConfirmDialog({
       ? "bg-destructive hover:bg-destructive/90"
       : variant === "warning"
       ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-      : "bg-primary hover:bg-primary/90"
+      : "btn-gold-shimmer  hover:btn-gold-shimmer /90"
 
   return (
     <Modal open={open} onClose={onClose} size="sm" showCloseButton={false}>

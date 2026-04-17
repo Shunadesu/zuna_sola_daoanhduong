@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { bannerApi } from '@/lib/api';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { bannerApi, uploadApi } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
@@ -17,6 +17,8 @@ import {
   Image as ImageIcon,
   Search,
   X,
+  Upload,
+  Loader2,
 } from 'lucide-react';
 
 interface Banner {
@@ -60,6 +62,9 @@ export default function BannerManager() {
     isActive: true,
     sortOrder: 0,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageDragOver, setImageDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
 
@@ -157,6 +162,42 @@ export default function BannerManager() {
 
   const resetForm = () => {
     setFormData({ title: '', subtitle: '', imageUrl: '', linkUrl: '', isActive: true, sortOrder: 0 });
+    setUploadingImage(false);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn file hình ảnh.' });
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      toast({ type: 'error', title: 'Lỗi', description: 'File quá lớn (tối đa 50MB).' });
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const response = await uploadApi.uploadImage(file);
+      setFormData((prev) => ({ ...prev, imageUrl: response.data.data.url }));
+      toast({ type: 'success', title: 'Thành công', description: 'Hình ảnh đã được tải lên.' });
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || 'Không thể tải ảnh lên.';
+      toast({ type: 'error', title: 'Lỗi', description: msg });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageUpload(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setImageDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleImageUpload(file);
   };
 
   if (isLoading) {
@@ -351,25 +392,61 @@ export default function BannerManager() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL Hình ảnh</Label>
-            <Input
-              id="imageUrl"
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              placeholder="https://..."
-              required
-              disabled={submitting}
-            />
-            {formData.imageUrl && (
-              <div className="mt-2 rounded-lg overflow-hidden border aspect-video max-w-xs">
-                <img
-                  src={formData.imageUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-              </div>
-            )}
+            <Label>Hình ảnh</Label>
+            <div
+              className={`
+                relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
+                ${imageDragOver ? 'border-primary btn-gold-shimmer /5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}
+                ${uploadingImage ? 'pointer-events-none opacity-60' : ''}
+              `}
+              onDragOver={(e) => { e.preventDefault(); setImageDragOver(true); }}
+              onDragLeave={() => setImageDragOver(false)}
+              onDrop={handleDrop}
+              onClick={() => !uploadingImage && fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              {uploadingImage ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Đang tải lên...</p>
+                </div>
+              ) : formData.imageUrl ? (
+                <div className="space-y-3">
+                  <img
+                    src={formData.imageUrl}
+                    alt="Preview"
+                    className="max-h-48 mx-auto rounded-lg object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <p className="text-xs text-muted-foreground">Kéo thả hoặc click để thay ảnh khác</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    {imageDragOver ? (
+                      <Upload className="w-6 h-6 text-primary" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {imageDragOver ? 'Thả file vào đây' : 'Kéo thả ảnh hoặc click để chọn'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP (tối đa 50MB)</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formData.imageUrl ? 'Hình ảnh đã được tải lên server.' : 'Chưa có hình ảnh nào được chọn.'}
+            </p>
           </div>
 
           <div className="space-y-2">

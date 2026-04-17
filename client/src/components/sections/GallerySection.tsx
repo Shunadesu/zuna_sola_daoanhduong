@@ -1,28 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Download, ZoomIn } from 'lucide-react';
-import { LazyImage } from '@/components/animated';
-
-interface GalleryImage {
-  src: string;
-  alt: string;
-  category: string;
-}
-
-const galleryImages: GalleryImage[] = [
-  { src: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80', alt: 'Hình ảnh căn hộ', category: 'căn hộ' },
-  { src: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80', alt: 'Phòng khách hiện đại', category: 'nội thất' },
-  { src: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80', alt: 'Phòng ngủ cao cấp', category: 'nội thất' },
-  { src: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80', alt: 'Bếp hiện đại', category: 'nội thất' },
-  { src: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80', alt: 'Toàn cảnh dự án', category: 'căn hộ' },
-  { src: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80', alt: 'Khu vực sinh hoạt', category: 'tiện ích' },
-  { src: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80', alt: 'Hồ bơi', category: 'tiện ích' },
-  { src: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80', alt: 'Mặt bằng dự án', category: 'căn hộ' },
-  { src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', alt: 'Khu vườn', category: 'tiện ích' },
-  { src: 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&q=80', alt: 'Khu gym', category: 'tiện ích' },
-  { src: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80', alt: 'Phòng làm việc', category: 'nội thất' },
-  { src: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80', alt: 'Phòng tắm', category: 'nội thất' },
-];
+import { galleryApi, Gallery } from '@/lib/api';
 
 const categories = [
   { id: 'all', label: 'Tất cả' },
@@ -32,13 +11,31 @@ const categories = [
 ];
 
 export function GallerySection() {
+  const [galleries, setGalleries] = useState<Gallery[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
 
-  const filteredImages =
-    activeCategory === 'all'
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === activeCategory);
+  useEffect(() => {
+    fetchGalleries();
+  }, []);
+
+  const fetchGalleries = async () => {
+    try {
+      const res = await galleryApi.getActive();
+      if (res.data?.success) {
+        setGalleries(res.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch galleries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredImages = activeCategory === 'all'
+    ? galleries
+    : galleries.filter((img) => img.category === activeCategory);
 
   const openLightbox = (index: number) => setSelectedIndex(index);
   const closeLightbox = () => setSelectedIndex(null);
@@ -58,6 +55,32 @@ export function GallerySection() {
     document.body.removeChild(link);
   };
 
+  if (isLoading) {
+    return (
+      <section id="gallery" className="py-20 md:py-28 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+              Hình ảnh
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              Thư Viện Ảnh
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="aspect-[4/3] bg-gray-200 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (filteredImages.length === 0 && activeCategory === 'all') {
+    return null;
+  }
+
   return (
     <section id="gallery" className="py-20 md:py-28 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -67,7 +90,7 @@ export function GallerySection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+          <span className="inline-block px-4 py-2 btn-gold-shimmer /10 text-primary text-sm font-medium rounded-full mb-4">
             Hình ảnh
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -79,60 +102,68 @@ export function GallerySection() {
         </motion.div>
 
         {/* Category Filter */}
-        <div className="flex justify-center mb-10">
-          <div className="flex gap-2 p-1 bg-white rounded-xl shadow-sm overflow-x-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  activeCategory === cat.id
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+        {filteredImages.length > 0 && (
+          <div className="flex justify-center mb-10">
+            <div className="flex gap-2 p-1 bg-white rounded-xl shadow-sm overflow-x-auto">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-5 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeCategory === cat.id
+                      ? 'btn-gold-shimmer  text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-          {filteredImages.map((image, index) => (
-            <motion.div
-              key={`${image.src}-${index}`}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              className={`relative overflow-hidden rounded-xl cursor-pointer group ${
-                index === 0 || index === 4 ? 'md:col-span-2' : ''
-              }`}
-              onClick={() => openLightbox(index)}
-            >
-              <LazyImage
-                src={image.src}
-                alt={image.alt}
-                className="w-full h-48 md:h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                aspectRatio={index === 0 || index === 4 ? '16/9' : '4/3'}
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
-                  <ZoomIn className="w-5 h-5 text-gray-800" />
+        {filteredImages.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            {filteredImages.map((image, index) => (
+              <motion.div
+                key={image._id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                className={`relative overflow-hidden rounded-xl cursor-pointer group ${
+                  index === 0 || index === 4 ? 'md:col-span-2' : ''
+                }`}
+                onClick={() => openLightbox(index)}
+              >
+                <img
+                  src={image.imageUrl}
+                  alt={image.title}
+                  className="w-full h-48 md:h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                    <ZoomIn className="w-5 h-5 text-gray-800" />
+                  </div>
                 </div>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                <p className="text-white text-xs font-medium truncate">{image.alt}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
+                  <p className="text-white text-xs font-medium truncate">{image.title}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            <p>Không có hình ảnh nào trong danh mục này.</p>
+          </div>
+        )}
       </div>
 
       {/* Lightbox */}
       <AnimatePresence>
-        {selectedIndex !== null && (
+        {selectedIndex !== null && filteredImages[selectedIndex] && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -157,7 +188,7 @@ export function GallerySection() {
               className="absolute top-4 right-16 p-2 text-white hover:bg-white/10 rounded-full transition-colors z-10"
               onClick={(e) => {
                 e.stopPropagation();
-                handleDownload(filteredImages[selectedIndex].src, filteredImages[selectedIndex].alt);
+                handleDownload(filteredImages[selectedIndex].imageUrl, filteredImages[selectedIndex].title);
               }}
               aria-label="Download image"
             >
@@ -179,8 +210,8 @@ export function GallerySection() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              src={filteredImages[selectedIndex].src}
-              alt={filteredImages[selectedIndex].alt}
+              src={filteredImages[selectedIndex].imageUrl}
+              alt={filteredImages[selectedIndex].title}
               className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
@@ -196,7 +227,7 @@ export function GallerySection() {
 
             {/* Counter */}
             <div className="absolute bottom-6 text-white text-center w-full">
-              <p className="text-base font-medium">{filteredImages[selectedIndex].alt}</p>
+              <p className="text-base font-medium">{filteredImages[selectedIndex].title}</p>
               <p className="text-sm text-white/60 mt-1">
                 {selectedIndex + 1} / {filteredImages.length}
               </p>

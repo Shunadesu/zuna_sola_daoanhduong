@@ -26,7 +26,7 @@ export default function Login() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 btn-gold-shimmer  rounded-xl flex items-center justify-center">
               <Building2 className="w-7 h-7 text-white" />
             </div>
             <div>

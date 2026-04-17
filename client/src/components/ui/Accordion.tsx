@@ -42,12 +42,12 @@ export function Accordion({ items, className, allowMultiple = false }: Accordion
         return (
           <div
             key={index}
-            className="border rounded-xl overflow-hidden bg-card"
+            className="border border-border rounded-xl overflow-hidden bg-card"
           >
             <button
               type="button"
               onClick={() => toggleItem(index)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-accent/50 transition-colors"
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/50 transition-colors"
               aria-expanded={isOpen}
               aria-controls={`accordion-content-${index}`}
               id={`accordion-trigger-${index}`}
