@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IOverview extends Document {
   title: string;
+  imageUrl?: string;
   images: {
     imageUrl: string;
     sortOrder: number;
@@ -15,6 +16,7 @@ export interface IOverview extends Document {
 
 const OverviewSchema = new Schema({
   title: { type: String, required: true },
+  imageUrl: { type: String, default: '' },
   images: [{
     imageUrl: { type: String, required: true },
     sortOrder: { type: Number, default: 0 },

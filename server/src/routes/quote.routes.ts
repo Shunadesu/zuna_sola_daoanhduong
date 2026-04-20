@@ -14,12 +14,17 @@ router.post('/', async (req, res: Response) => {
       return;
     }
 
+    const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0].trim()
+      || req.socket?.remoteAddress
+      || '';
+
     const quote = await Quote.create({
       fullName,
       phone,
       email: email || '',
       apartment: apartment || '',
-      message: message || ''
+      message: message || '',
+      ipAddress,
     });
 
     await telegramService.sendQuoteNotification({
@@ -27,7 +32,8 @@ router.post('/', async (req, res: Response) => {
       phone,
       email,
       apartment,
-      message
+      message,
+      ipAddress,
     });
 
     res.status(201).json({ success: true, data: quote });

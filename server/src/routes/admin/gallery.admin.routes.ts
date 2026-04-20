@@ -25,7 +25,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const validCategories = ['căn hộ', 'nội thất', 'tiện ích'];
+    const validCategories = ['biệt thự song lập', 'biệt thự đơn lập', 'nhà phố liền kề'];
     if (!validCategories.includes(category)) {
       res.status(400).json({ success: false, message: 'Category không hợp lệ' });
       return;
@@ -52,7 +52,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     const { title, imageUrl, category, isActive, sortOrder } = req.body;
 
     if (category) {
-      const validCategories = ['căn hộ', 'nội thất', 'tiện ích'];
+      const validCategories = ['biệt thự song lập', 'biệt thự đơn lập', 'nhà phố liền kề'];
       if (!validCategories.includes(category)) {
         res.status(400).json({ success: false, message: 'Category không hợp lệ' });
         return;

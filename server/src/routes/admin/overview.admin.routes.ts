@@ -18,7 +18,7 @@ router.get('/', async (_req: AuthRequest, res: Response) => {
 
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { title, images, linkUrl, isActive, sortOrder } = req.body;
+    const { title, imageUrl, images, linkUrl, isActive, sortOrder } = req.body;
 
     if (!title) {
       res.status(400).json({ success: false, message: 'Title is required' });
@@ -27,6 +27,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const overview = await Overview.create({
       title,
+      imageUrl: imageUrl || '',
       images: images || [],
       linkUrl: linkUrl || '',
       isActive: isActive ?? true,
@@ -43,11 +44,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, images, linkUrl, isActive, sortOrder } = req.body;
+    const { title, imageUrl, images, linkUrl, isActive, sortOrder } = req.body;
 
     const overview = await Overview.findByIdAndUpdate(
       id,
-      { title, images, linkUrl, isActive, sortOrder },
+      { title, imageUrl, images, linkUrl, isActive, sortOrder },
       { new: true, runValidators: true }
     );
 

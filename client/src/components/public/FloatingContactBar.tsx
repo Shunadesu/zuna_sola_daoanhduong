@@ -27,6 +27,8 @@ function QuoteModal({ open, onClose }: QuoteModalProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
+    email: '',
+    apartment: '',
   });
 
   useEffect(() => {
@@ -70,7 +72,7 @@ function QuoteModal({ open, onClose }: QuoteModalProps) {
       const data = await res.json();
       if (data.success) {
         toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
-        setFormData({ fullName: '', phone: '' });
+        setFormData({ fullName: '', phone: '', email: '', apartment: '' });
         onClose();
       } else {
         toast.error(data.message || 'Có lỗi xảy ra');
@@ -155,6 +157,31 @@ function QuoteModal({ open, onClose }: QuoteModalProps) {
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email (tuỳ chọn)</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="Nhập email của bạn"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Căn hộ quan tâm</label>
+                <select
+                  value={formData.apartment}
+                  onChange={(e) => setFormData({ ...formData, apartment: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                >
+                  <option value="">-- Chọn loại căn hộ --</option>
+                  <option value="biệt thự song lập">Biệt thự song lập</option>
+                  <option value="biệt thự đơn lập">Biệt thự đơn lập</option>
+                  <option value="nhà phố liền kề">Nhà phố liền kề</option>
+                </select>
               </div>
 
               <button

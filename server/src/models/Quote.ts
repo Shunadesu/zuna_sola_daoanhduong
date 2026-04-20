@@ -8,6 +8,7 @@ export interface IQuote extends Document {
   email?: string;
   apartment?: string;
   message?: string;
+  ipAddress?: string;
   status: QuoteStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -19,6 +20,7 @@ const QuoteSchema = new Schema({
   email: { type: String, default: '' },
   apartment: { type: String, default: '' },
   message: { type: String, default: '' },
+  ipAddress: { type: String, default: '' },
   status: { 
     type: String, 
     enum: ['new', 'contacted', 'closed'], 

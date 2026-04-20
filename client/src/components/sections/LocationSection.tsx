@@ -18,7 +18,7 @@ export function LocationSection() {
     <section id="location" className="py-20 md:py-28 bg-gray-50">
       <div className="container mx-auto px-4">
         <FadeInUp className="text-center mb-16">
-          <span className="inline-block px-4 py-2 btn-gold-shimmer /10 text-primary text-sm font-medium rounded-full mb-4">
+          <span className="inline-block px-4 py-2 btn-gold-shimmer/10 text-primary text-sm font-medium rounded-full mb-4">
             Vị trí
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -44,12 +44,12 @@ export function LocationSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-6 left-6 right-6 text-white">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 btn-gold-shimmer  rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 btn-gold-shimmer rounded-full flex items-center justify-center">
                         <MapPin className="w-6 h-6" />
                       </div>
                       <div>
                         <p className="font-semibold text-lg">Đảo Ảnh Dương</p>
-                        <p className="text-white/80 text-sm">Quận 7, TP. Hồ Chí Minh</p>
+                        <p className="text-white/80 text-sm">Quận 2, TP. Hồ Chí Minh</p>
                       </div>
                     </div>
                   </div>
@@ -77,7 +77,7 @@ export function LocationSection() {
                   </div>
                   <div>
                     <p className="font-semibold text-lg">Sola Đảo Ảnh Dương</p>
-                    <p className="text-white/80 text-sm">Quận 7, TP. Hồ Chí Minh</p>
+                    <p className="text-white/80 text-sm">Quận 2, TP. Hồ Chí Minh</p>
                   </div>
                 </div>
               </div>

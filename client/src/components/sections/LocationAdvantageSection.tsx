@@ -48,7 +48,7 @@ export function LocationAdvantageSection({ imageUrl }: LocationAdvantageSectionP
             Vị Trí Đắc Địa
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Sở hữu vị trí chiến lược tại trái tim Quận 7, kết nối hoàn hảo mọi tiện ích
+            Sở hữu vị trí chiến lược tại trái tim Quận 2, kết nối hoàn hảo mọi tiện ích
           </p>
         </motion.div>
 

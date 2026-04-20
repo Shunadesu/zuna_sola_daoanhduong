@@ -1,15 +1,14 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { bannerApi, uploadApi } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Select } from '@/components/ui/Select';
-import { SkeletonCardList } from '@/components/ui/Skeleton';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Pagination } from '@/components/ui/Pagination';
+import { DataTable, Column } from '@/components/ui/DataTable';
+import { ImageInput } from '@/components/ui/ImageInput';
 import {
   Plus,
   Pencil,
@@ -17,8 +16,6 @@ import {
   Image as ImageIcon,
   Search,
   X,
-  Upload,
-  Loader2,
 } from 'lucide-react';
 
 interface Banner {
@@ -41,8 +38,6 @@ interface BannerFormData {
   sortOrder: number;
 }
 
-const PAGE_SIZE = 6;
-
 export default function BannerManager() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,8 +46,9 @@ export default function BannerManager() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const [filterActive, setFilterActive] = useState<string>('all');
+  const [sortKey, setSortKey] = useState('sortOrder');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const [formData, setFormData] = useState<BannerFormData>({
     title: '',
@@ -62,9 +58,6 @@ export default function BannerManager() {
     isActive: true,
     sortOrder: 0,
   });
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageDragOver, setImageDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
 
@@ -83,30 +76,6 @@ export default function BannerManager() {
       setIsLoading(false);
     }
   };
-
-  const filtered = useMemo(() => {
-    let result = banners;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (b) => b.title.toLowerCase().includes(q) || (b.subtitle || '').toLowerCase().includes(q)
-      );
-    }
-    if (filterActive !== 'all') {
-      result = result.filter((b) => b.isActive === (filterActive === 'active'));
-    }
-    return result;
-  }, [banners, search, filterActive]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, filterActive]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,80 +131,151 @@ export default function BannerManager() {
 
   const resetForm = () => {
     setFormData({ title: '', subtitle: '', imageUrl: '', linkUrl: '', isActive: true, sortOrder: 0 });
-    setUploadingImage(false);
   };
 
-  const handleImageUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn file hình ảnh.' });
-      return;
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      toast({ type: 'error', title: 'Lỗi', description: 'File quá lớn (tối đa 50MB).' });
-      return;
-    }
-    setUploadingImage(true);
-    try {
-      const response = await uploadApi.uploadImage(file);
-      setFormData((prev) => ({ ...prev, imageUrl: response.data.data.url }));
-      toast({ type: 'success', title: 'Thành công', description: 'Hình ảnh đã được tải lên.' });
-    } catch (error: any) {
-      const msg = error?.response?.data?.message || 'Không thể tải ảnh lên.';
-      toast({ type: 'error', title: 'Lỗi', description: msg });
-    } finally {
-      setUploadingImage(false);
+  const handleUpload = async (file: File): Promise<string> => {
+    const response = await uploadApi.uploadImage(file);
+    return response.data.data.url as string;
+  };
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageUpload(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
+  const filtered = useMemo(() => {
+    let result = [...banners];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (b) => b.title.toLowerCase().includes(q) || (b.subtitle || '').toLowerCase().includes(q)
+      );
+    }
+    if (filterActive !== 'all') {
+      result = result.filter((b) => b.isActive === (filterActive === 'active'));
+    }
+    result.sort((a, b) => {
+      const aVal = (a as Record<string, unknown>)[sortKey];
+      const bVal = (b as Record<string, unknown>)[sortKey];
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return result;
+  }, [banners, search, filterActive, sortKey, sortDir]);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setImageDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleImageUpload(file);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <SkeletonCardList count={1} />
-          </div>
+  const columns: Column<Banner>[] = [
+    {
+      key: 'thumb',
+      header: 'Ảnh',
+      width: '100px',
+      render: (item) => (
+        <div className="w-20 h-12 rounded overflow-hidden bg-muted flex-shrink-0">
+          {item.imageUrl ? (
+            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-5 h-5 text-muted-foreground" />
+            </div>
+          )}
         </div>
-        <SkeletonCardList count={6} />
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      key: 'title',
+      header: 'Tiêu đề',
+      sortable: true,
+      render: (item) => (
+        <div className="max-w-xs">
+          <span className="font-medium truncate block">{item.title}</span>
+          {item.subtitle && (
+            <span className="text-xs text-muted-foreground truncate block">{item.subtitle}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'linkUrl',
+      header: 'Link',
+      width: '160px',
+      render: (item) =>
+        item.linkUrl ? (
+          <a
+            href={item.linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-blue-600 hover:underline truncate block max-w-xs"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {item.linkUrl}
+          </a>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        ),
+    },
+    {
+      key: 'isActive',
+      header: 'Trạng thái',
+      width: '120px',
+      render: (item) => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+          item.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+        }`}>
+          {item.isActive ? 'Hiển thị' : 'Đã ẩn'}
+        </span>
+      ),
+    },
+    {
+      key: 'sortOrder',
+      header: 'Thứ tự',
+      width: '80px',
+      sortable: true,
+      render: (item) => (
+        <span className="text-sm text-muted-foreground">{item.sortOrder}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Thao tác',
+      width: '120px',
+      render: (item) => (
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+            <Pencil className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setDeleteId(item._id)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Quản lý Banner</h2>
-          <p className="text-muted-foreground">Quản lý banner hiển thị trên trang chủ</p>
+          <p className="text-muted-foreground text-sm">Quản lý banner hiển thị trên trang chủ</p>
         </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setEditingBanner(null);
-            setShowModal(true);
-          }}
-        >
+        <Button onClick={() => { resetForm(); setEditingBanner(null); setShowModal(true); }}>
           <Plus className="w-4 h-4 mr-2" />
           Thêm Banner
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+        <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Tìm kiếm banner..."
@@ -265,102 +305,18 @@ export default function BannerManager() {
         </div>
       </div>
 
-      {/* Banner Grid */}
-      {paginated.length === 0 ? (
-        <EmptyState
-          variant={search ? 'no-results' : 'default'}
-          title={search ? 'Không tìm thấy banner' : 'Chưa có banner nào'}
-          description={
-            search
-              ? `Không có banner nào phù hợp với "${search}"`
-              : 'Bắt đầu bằng cách thêm banner mới.'
-          }
-          action={
-            !search
-              ? () => {
-                  resetForm();
-                  setEditingBanner(null);
-                  setShowModal(true);
-                }
-              : undefined
-          }
-          actionLabel={!search ? 'Thêm Banner' : undefined}
-        />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {paginated.map((banner) => (
-              <div
-                key={banner._id}
-                className="bg-card rounded-xl border overflow-hidden group hover:shadow-md transition-shadow"
-              >
-                <div className="aspect-video relative bg-muted">
-                  {banner.imageUrl ? (
-                    <img
-                      src={banner.imageUrl}
-                      alt={banner.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                    </div>
-                  )}
-                  {!banner.isActive && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm font-medium">
-                        Đã ẩn
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold truncate">{banner.title}</h3>
-                  {banner.subtitle && (
-                    <p className="text-sm text-muted-foreground truncate mt-0.5">
-                      {banner.subtitle}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-xs text-muted-foreground">
-                      Thứ tự: {banner.sortOrder}
-                    </span>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(banner)}
-                        aria-label="Sửa banner"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(banner._id)}
-                        className="text-destructive hover:text-destructive"
-                        aria-label="Xóa banner"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <DataTable
+        columns={columns}
+        data={filtered}
+        keyExtractor={(item) => item._id}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={handleSort}
+        loading={isLoading}
+        skeletonRows={5}
+        emptyMessage="Chưa có banner nào"
+      />
 
-          {/* Pagination */}
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        </>
-      )}
-
-      {/* Form Modal */}
       <Modal
         open={showModal}
         onClose={() => !submitting && setShowModal(false)}
@@ -391,63 +347,29 @@ export default function BannerManager() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Hình ảnh</Label>
-            <div
-              className={`
-                relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
-                ${imageDragOver ? 'border-primary btn-gold-shimmer /5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}
-                ${uploadingImage ? 'pointer-events-none opacity-60' : ''}
-              `}
-              onDragOver={(e) => { e.preventDefault(); setImageDragOver(true); }}
-              onDragLeave={() => setImageDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => !uploadingImage && fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              {uploadingImage ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Đang tải lên...</p>
-                </div>
-              ) : formData.imageUrl ? (
-                <div className="space-y-3">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Preview"
-                    className="max-h-48 mx-auto rounded-lg object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <p className="text-xs text-muted-foreground">Kéo thả hoặc click để thay ảnh khác</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                    {imageDragOver ? (
-                      <Upload className="w-6 h-6 text-primary" />
-                    ) : (
-                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {imageDragOver ? 'Thả file vào đây' : 'Kéo thả ảnh hoặc click để chọn'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP (tối đa 50MB)</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {formData.imageUrl ? 'Hình ảnh đã được tải lên server.' : 'Chưa có hình ảnh nào được chọn.'}
-            </p>
-          </div>
+          <ImageInput
+            value={formData.imageUrl}
+            onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+            onUpload={async (file) => {
+              if (file.size > 50 * 1024 * 1024) {
+                toast({ type: 'error', title: 'Lỗi', description: 'File quá lớn (tối đa 50MB).' });
+                return;
+              }
+              if (!file.type.startsWith('image/')) {
+                toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn file hình ảnh.' });
+                return;
+              }
+              try {
+                const url = await handleUpload(file);
+                setFormData((prev) => ({ ...prev, imageUrl: url }));
+                toast({ type: 'success', title: 'Thành công', description: 'Hình ảnh đã được tải lên.' });
+              } catch {
+                toast({ type: 'error', title: 'Lỗi', description: 'Không thể tải ảnh lên.' });
+              }
+            }}
+            label="Hình ảnh"
+            hint="Dùng URL từ bên ngoài hoặc upload ảnh lên server"
+          />
 
           <div className="space-y-2">
             <Label htmlFor="linkUrl">Link (tùy chọn)</Label>
@@ -489,12 +411,7 @@ export default function BannerManager() {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowModal(false)}
-              disabled={submitting}
-            >
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={submitting}>
               Hủy
             </Button>
             <Button type="submit" disabled={submitting}>
@@ -504,7 +421,6 @@ export default function BannerManager() {
         </form>
       </Modal>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteId}
         onClose={() => setDeleteId(null)}

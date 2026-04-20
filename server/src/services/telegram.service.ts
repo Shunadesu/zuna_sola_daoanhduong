@@ -9,14 +9,17 @@ interface QuoteData {
 }
 
 class TelegramService {
-  private botToken: string | undefined;
-  private chatId: string | undefined;
-  private apiUrl: string;
+  private get botToken(): string | undefined {
+    return process.env.TELEGRAM_BOT_TOKEN;
+  }
 
-  constructor() {
-    this.botToken = process.env.TELEGRAM_BOT_TOKEN;
-    this.chatId = process.env.TELEGRAM_CHAT_ID;
-    this.apiUrl = `https://api.telegram.org/bot${this.botToken}`;
+  private get chatId(): string | undefined {
+    return process.env.TELEGRAM_CHAT_ID;
+  }
+
+  private get apiUrl(): string {
+    const token = this.botToken;
+    return `https://api.telegram.org/bot${token}`;
   }
 
   isConfigured(): boolean {
@@ -36,8 +39,8 @@ class TelegramService {
         body: JSON.stringify({
           chat_id: this.chatId,
           text,
-          parse_mode: 'Markdown'
-        })
+          parse_mode: 'Markdown',
+        }),
       });
 
       if (!response.ok) {
@@ -52,15 +55,18 @@ class TelegramService {
     }
   }
 
-  async sendQuoteNotification(quote: QuoteData): Promise<boolean> {
+  async sendQuoteNotification(quote: QuoteData & { ipAddress?: string }): Promise<boolean> {
+    const phoneRaw = quote.phone.replace(/\D/g, '');
     const message = `📩 *Yêu cầu báo giá mới*
 
-👤 Họ tên: *${quote.fullName}*
-📱 Điện thoại: ${quote.phone}
-📧 Email: ${quote.email || 'Không có'}
-🏠 Căn hộ: ${quote.apartment || 'Chưa chọn'}
-💬 Tin nhắn: ${quote.message || 'Không có'}
-⏰ Thời gian: ${new Date().toLocaleString('vi-VN')}`;
+👤 *Họ tên:* ${quote.fullName}
+📱 *Điện thoại:* \`${quote.phone}\`
+   ▶️ Copy SĐT: ${phoneRaw}
+📧 *Email:* ${quote.email || '—'}
+🏠 *Căn hộ:* ${quote.apartment || '—'}
+💬 *Tin nhắn:* ${quote.message || '—'}
+🌐 *IP gửi:* \`${quote.ipAddress || '—'}\`
+⏰ *Thời gian:* ${new Date().toLocaleString('vi-VN')}`;
 
     return this.sendMessage(message);
   }

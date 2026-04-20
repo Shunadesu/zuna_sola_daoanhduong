@@ -1,79 +1,58 @@
-import { AlertTriangle } from "lucide-react"
-import { Modal } from "./Modal"
-import { Button } from "./Button"
+import * as React from 'react';
+import { Modal } from './Modal';
+import { Button } from './Button';
+import { AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ConfirmDialogProps {
-  open: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title?: string
-  description?: string
-  confirmLabel?: string
-  cancelLabel?: string
-  variant?: "danger" | "warning" | "default"
-  loading?: boolean
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'default' | 'destructive';
+  loading?: boolean;
 }
 
 export function ConfirmDialog({
   open,
   onClose,
   onConfirm,
-  title = "Xác nhận",
-  description = "Bạn có chắc chắn muốn thực hiện hành động này?",
-  confirmLabel = "Xác nhận",
-  cancelLabel = "Hủy",
-  variant = "danger",
+  title = 'Xác nhận',
+  description,
+  confirmText = 'Xác nhận',
+  cancelText = 'Hủy',
+  variant = 'default',
   loading = false,
 }: ConfirmDialogProps) {
-  const confirmButtonClass =
-    variant === "danger"
-      ? "bg-destructive hover:bg-destructive/90"
-      : variant === "warning"
-      ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-      : "btn-gold-shimmer  hover:btn-gold-shimmer /90"
-
   return (
-    <Modal open={open} onClose={onClose} size="sm" showCloseButton={false}>
-      <div className="flex flex-col items-center text-center">
-        <div
-          className={`rounded-full p-3 mb-4 ${
-            variant === "danger"
-              ? "bg-red-100"
-              : variant === "warning"
-              ? "bg-yellow-100"
-              : "bg-blue-100"
-          }`}
-        >
-          <AlertTriangle
-            className={`h-6 w-6 ${
-              variant === "danger"
-                ? "text-destructive"
-                : variant === "warning"
-                ? "text-yellow-600"
-                : "text-primary"
-            }`}
-          />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground mb-6">{description}</p>
-        <div className="flex gap-3 w-full">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={onClose}
-            disabled={loading}
-          >
-            {cancelLabel}
+    <Modal open={open} onClose={onClose} title={title} size="sm" showCloseButton={false}>
+      <div className="space-y-6">
+        {description && (
+          <div className="flex items-start gap-4">
+            {variant === 'destructive' && (
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground pt-1.5">{description}</p>
+          </div>
+        )}
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            {cancelText}
           </Button>
           <Button
-            className={`flex-1 text-white ${confirmButtonClass}`}
+            variant={variant === 'destructive' ? 'destructive' : 'default'}
             onClick={onConfirm}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? "Đang xử lý..." : confirmLabel}
+            {confirmText}
           </Button>
         </div>
       </div>
     </Modal>
-  )
+  );
 }

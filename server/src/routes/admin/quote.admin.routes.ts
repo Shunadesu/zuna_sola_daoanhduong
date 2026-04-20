@@ -68,4 +68,22 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// Delete quote
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const quote = await Quote.findByIdAndDelete(id);
+
+    if (!quote) {
+      res.status(404).json({ success: false, message: 'Quote not found' });
+      return;
+    }
+
+    res.json({ success: true, message: 'Quote deleted successfully' });
+  } catch (error) {
+    console.error('Delete quote error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 export const quoteAdminRoutes = router;

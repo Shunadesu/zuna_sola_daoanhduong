@@ -6,8 +6,9 @@ import { Visit } from './Visit.js';
 import { Overview } from './Overview.js';
 import { Amenity } from './Amenity.js';
 import { Gallery } from './Gallery.js';
+import { Perspective } from './Perspective.js';
 
-export { Admin, Banner, Quote, Contact, Visit, Overview, Amenity, Gallery };
+export { Admin, Banner, Quote, Contact, Visit, Overview, Amenity, Gallery, Perspective };
 export type { IAdmin } from './Admin.js';
 export type { IBanner } from './Banner.js';
 export type { IQuote } from './Quote.js';
@@ -16,5 +17,6 @@ export type { IVisit } from './Visit.js';
 export type { IOverview } from './Overview.js';
 export type { IAmenity } from './Amenity.js';
 export type { IGallery } from './Gallery.js';
+export type { IPerspective } from './Perspective.js';
 export type { ContactType } from './Contact.js';
 export type { QuoteStatus } from './Quote.js';

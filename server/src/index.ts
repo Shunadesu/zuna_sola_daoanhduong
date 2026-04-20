@@ -19,7 +19,10 @@ import {
   amenityRoutes,
   amenityAdminRoutes,
   galleryRoutes,
-  galleryAdminRoutes
+  galleryAdminRoutes,
+  perspectiveRoutes,
+  perspectiveAdminRoutes,
+  telegramAdminRoutes
 } from './routes/index.js';
 import uploadRoutes from './routes/upload.routes.js';
 
@@ -47,6 +50,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/overviews', overviewRoutes);
 app.use('/api/amenities', amenityRoutes);
 app.use('/api/galleries', galleryRoutes);
+app.use('/api/perspectives', perspectiveRoutes);
 
 // Track page views (from frontend client)
 app.use('/api/track', trackRoutes);
@@ -58,7 +62,9 @@ app.use('/api/admin/contacts', contactAdminRoutes);
 app.use('/api/admin/overviews', overviewAdminRoutes);
 app.use('/api/admin/amenities', amenityAdminRoutes);
 app.use('/api/admin/galleries', galleryAdminRoutes);
+app.use('/api/admin/perspectives', perspectiveAdminRoutes);
 app.use('/api/admin/stats', statsRoutes);
+app.use('/api/admin/telegram', telegramAdminRoutes);
 
 // Upload Routes
 app.use('/api', uploadRoutes);

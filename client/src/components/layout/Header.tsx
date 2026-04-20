@@ -7,7 +7,6 @@ import { contactApi } from '@/lib/api';
 
 const navLinks = [
   { href: '#home', label: 'Trang chủ' },
-  { href: '#location', label: 'Vị trí' },
   { href: '#overview', label: 'Tổng thể' },
   { href: '#amenities', label: 'Tiện ích' },
   { href: '#gallery', label: 'Hình ảnh' },

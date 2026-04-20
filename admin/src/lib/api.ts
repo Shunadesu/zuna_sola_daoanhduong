@@ -84,6 +84,7 @@ export const quoteApi = {
   getStats: () => api.get('/api/admin/quotes/stats'),
   updateStatus: (id: string, status: string) =>
     api.put(`/api/admin/quotes/${id}`, { status }),
+  delete: (id: string) => api.delete(`/api/admin/quotes/${id}`),
 };
 
 // Contact API - Public
@@ -104,6 +105,17 @@ export const statsApi = {
   getDashboard: () => api.get('/api/admin/stats'),
   getDaily: () => api.get('/api/admin/stats/daily'),
   getQuoteStatus: () => api.get('/api/admin/stats/quote-status'),
+};
+
+// Telegram API
+export const telegramApi = {
+  getConfig: () => api.get('/api/admin/telegram'),
+  updateConfig: (data: { botToken: string; chatId: string }) =>
+    api.put('/api/admin/telegram', data),
+  sendTest: (data?: { botToken?: string; chatId?: string }) =>
+    api.post('/api/admin/telegram/test', data || {}),
+  getSubscribers: (token?: string) =>
+    api.get('/api/admin/telegram/subscribers' + (token ? `?token=${encodeURIComponent(token)}` : '')),
 };
 
 // Types

@@ -11,6 +11,7 @@ import {
   ChevronRight,
   LogOut,
   X,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -18,10 +19,12 @@ const menuItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/banners', label: 'Banner', icon: Image },
   { path: '/overviews', label: 'Tổng thể', icon: Image },
+  { path: '/perspectives', label: 'Phối cảnh', icon: Image },
   { path: '/galleries', label: 'Thư viện ảnh', icon: GalleryHorizontalEnd },
   { path: '/amenities', label: 'Tiện ích', icon: Trees },
   { path: '/contacts', label: 'Liên hệ', icon: Phone },
   { path: '/quotes', label: 'Yêu cầu báo giá', icon: FileText },
+  { path: '/telegram', label: 'Telegram', icon: MessageSquare },
 ];
 
 interface SidebarProps {

@@ -7,7 +7,8 @@ const router = Router();
 router.get('/', async (_req, res: Response) => {
   try {
     const overviews = await Overview.find({ isActive: true })
-      .sort({ sortOrder: 1, createdAt: -1 });
+      .sort({ sortOrder: 1, createdAt: -1 })
+      .select('title imageUrl images linkUrl isActive sortOrder');
     res.json({ success: true, data: overviews });
   } catch (error) {
     console.error('Get overviews error:', error);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api, { uploadApi } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -7,16 +7,15 @@ import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { DataTable, Column } from '@/components/ui/DataTable';
+import { MultiImageInput } from '@/components/ui/MultiImageInput';
 import {
   Plus,
   Pencil,
   Trash2,
   Image as ImageIcon,
-  Upload,
-  Loader2,
+  Search,
   X,
-  GripVertical,
 } from 'lucide-react';
 
 interface AmenityImage {
@@ -55,9 +54,11 @@ export default function AmenityManager() {
   const [editingAmenity, setEditingAmenity] = useState<Amenity | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageDragOver, setImageDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [search, setSearch] = useState('');
+  const [filterActive, setFilterActive] = useState<string>('all');
+  const [sortKey, setSortKey] = useState('sortOrder');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const [formData, setFormData] = useState<AmenityFormData>({
     name: '',
@@ -142,46 +143,6 @@ export default function AmenityManager() {
 
   const resetForm = () => {
     setFormData({ name: '', images: [], description: '', isActive: true, sortOrder: 0 });
-    setUploadingImage(false);
-  };
-
-  const handleImageUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn file hình ảnh.' });
-      return;
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      toast({ type: 'error', title: 'Lỗi', description: 'File quá lớn (tối đa 50MB).' });
-      return;
-    }
-    setUploadingImage(true);
-    try {
-      const response = await uploadApi.uploadImage(file);
-      const newImage: AmenityImage = {
-        imageUrl: response.data.data.url,
-        sortOrder: formData.images.length,
-      };
-      setFormData((prev) => ({ ...prev, images: [...prev.images, newImage] }));
-      toast({ type: 'success', title: 'Thành công', description: 'Hình ảnh đã được tải lên.' });
-    } catch (error: any) {
-      const msg = error?.response?.data?.message || 'Không thể tải ảnh lên.';
-      toast({ type: 'error', title: 'Lỗi', description: msg });
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    files.forEach((file) => handleImageUpload(file));
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setImageDragOver(false);
-    const files = Array.from(e.dataTransfer.files);
-    files.filter((f) => f.type.startsWith('image/')).forEach((file) => handleImageUpload(file));
   };
 
   const handleParkSelect = (parkName: string) => {
@@ -195,165 +156,179 @@ export default function AmenityManager() {
     }
   };
 
-  const removeImage = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
+  const handleUpload = async (file: File): Promise<string> => {
+    const response = await uploadApi.uploadImage(file);
+    return response.data.data.url as string;
   };
 
-  const moveImage = (index: number, direction: 'up' | 'down') => {
-    const newImages = [...formData.images];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newImages.length) return;
-    [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
-    setFormData((prev) => ({ ...prev, images: newImages }));
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-8 w-64 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-48 bg-muted rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-card rounded-xl border overflow-hidden">
-              <div className="aspect-[4/3] bg-muted animate-pulse" />
-              <div className="p-4 space-y-2">
-                <div className="h-5 w-3/4 bg-muted rounded animate-pulse" />
-                <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
-              </div>
+  const filtered = useMemo(() => {
+    let result = [...amenities];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (a) => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)
+      );
+    }
+    if (filterActive !== 'all') {
+      result = result.filter((a) => a.isActive === (filterActive === 'active'));
+    }
+    result.sort((a, b) => {
+      const aVal = (a as Record<string, unknown>)[sortKey];
+      const bVal = (b as Record<string, unknown>)[sortKey];
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return result;
+  }, [amenities, search, filterActive, sortKey, sortDir]);
+
+  const columns: Column<Amenity>[] = [
+    {
+      key: 'thumb',
+      header: 'Ảnh',
+      width: '80px',
+      render: (item) => (
+        <div className="w-16 h-12 rounded overflow-hidden bg-muted flex-shrink-0">
+          {item.images && item.images.length > 0 ? (
+            <img src={item.images[0].imageUrl} alt={item.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-5 h-5 text-muted-foreground" />
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      key: 'name',
+      header: 'Tên công viên',
+      sortable: true,
+      render: (item) => (
+        <div className="max-w-xs">
+          <span className="font-medium truncate block">{item.name}</span>
+          {item.description && (
+            <span className="text-xs text-muted-foreground truncate block">{item.description}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'images',
+      header: 'Số ảnh',
+      width: '100px',
+      render: (item) => (
+        <span className="text-sm text-muted-foreground">{item.images?.length || 0}</span>
+      ),
+    },
+    {
+      key: 'isActive',
+      header: 'Trạng thái',
+      width: '120px',
+      render: (item) => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+          item.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+        }`}>
+          {item.isActive ? 'Hiển thị' : 'Đã ẩn'}
+        </span>
+      ),
+    },
+    {
+      key: 'sortOrder',
+      header: 'Thứ tự',
+      width: '80px',
+      sortable: true,
+      render: (item) => (
+        <span className="text-sm text-muted-foreground">{item.sortOrder}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Thao tác',
+      width: '120px',
+      render: (item) => (
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+            <Pencil className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setDeleteId(item._id)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Quản lý Tiện ích Công viên</h2>
-          <p className="text-muted-foreground">Quản lý hình ảnh công viên Stella, Horizon, Fountain</p>
+          <p className="text-muted-foreground text-sm">Quản lý hình ảnh công viên Stella, Horizon, Fountain</p>
         </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setEditingAmenity(null);
-            setShowModal(true);
-          }}
-        >
+        <Button onClick={() => { resetForm(); setEditingAmenity(null); setShowModal(true); }}>
           <Plus className="w-4 h-4 mr-2" />
           Thêm công viên
         </Button>
       </div>
 
-      {/* Grid */}
-      {amenities.length === 0 ? (
-        <EmptyState
-          title="Chưa có công viên nào"
-          description="Bắt đầu bằng cách thêm công viên."
-          action={() => {
-            resetForm();
-            setEditingAmenity(null);
-            setShowModal(true);
-          }}
-          actionLabel="Thêm công viên"
-        />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {amenities.map((item) => (
-            <div
-              key={item._id}
-              className="bg-card rounded-xl border overflow-hidden group hover:shadow-md transition-shadow"
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm kiếm công viên..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <div className="aspect-[4/3] relative bg-muted">
-                {item.images && item.images.length > 0 ? (
-                  <>
-                    <img
-                      src={item.images[0].imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    {item.images.length > 1 && (
-                      <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                        +{item.images.length - 1}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleEdit(item)}
-                        className="gap-2"
-                      >
-                        <Pencil className="w-4 h-4" />
-                        Chỉnh sửa
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div
-                    className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => handleEdit(item)}
-                  >
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
-                      <Plus className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium">Tải ảnh lên</p>
-                  </div>
-                )}
-                {!item.isActive && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm font-medium">
-                      Đã ẩn
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold truncate">{item.name}</h3>
-                {item.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
-                )}
-                <div className="flex items-center justify-between mt-3">
-                  <span className="text-xs text-muted-foreground">
-                    {item.images?.length || 0} ảnh
-                  </span>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(item)}
-                      aria-label="Sửa công viên"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteId(item._id)}
-                      className="text-destructive hover:text-destructive"
-                      aria-label="Xóa công viên"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
-      )}
+        <div className="w-full sm:w-48">
+          <Select
+            value={filterActive}
+            onChange={setFilterActive}
+            options={[
+              { value: 'all', label: 'Tất cả trạng thái' },
+              { value: 'active', label: 'Đang hiển thị' },
+              { value: 'inactive', label: 'Đã ẩn' },
+            ]}
+          />
+        </div>
+      </div>
 
-      {/* Form Modal */}
+      <DataTable
+        columns={columns}
+        data={filtered}
+        keyExtractor={(item) => item._id}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={handleSort}
+        loading={isLoading}
+        skeletonRows={5}
+        emptyMessage="Chưa có công viên nào"
+      />
+
       <Modal
         open={showModal}
         onClose={() => !submitting && setShowModal(false)}
@@ -397,93 +372,13 @@ export default function AmenityManager() {
             />
           </div>
 
-          {/* Images Section */}
-          <div className="space-y-3">
-            <Label>Hình ảnh ({formData.images.length})</Label>
-            <div
-              className={`
-                relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
-                ${imageDragOver ? 'border-primary' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}
-                ${uploadingImage ? 'pointer-events-none opacity-60' : ''}
-              `}
-              onDragOver={(e) => { e.preventDefault(); setImageDragOver(true); }}
-              onDragLeave={() => setImageDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => !uploadingImage && fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              {uploadingImage ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Đang tải lên...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                    {imageDragOver ? (
-                      <Upload className="w-6 h-6 text-primary" />
-                    ) : (
-                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {imageDragOver ? 'Thả file vào đây' : 'Kéo thả ảnh hoặc click để chọn'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP (tối đa 50MB mỗi ảnh)</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Image Grid */}
-            {formData.images.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 mt-3">
-                {formData.images.map((img, index) => (
-                  <div key={index} className="relative group aspect-square bg-muted rounded-lg overflow-hidden">
-                    <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => moveImage(index, 'up')}
-                        disabled={index === 0}
-                        className="p-1 bg-white rounded text-black disabled:opacity-30"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveImage(index, 'down')}
-                        disabled={index === formData.images.length - 1}
-                        className="p-1 bg-white rounded text-black disabled:opacity-30"
-                      >
-                        ↓
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="p-1 bg-red-500 rounded text-white"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {index === 0 && (
-                      <div className="absolute top-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded">
-                        Ảnh chính
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <MultiImageInput
+            value={formData.images}
+            onChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+            onUpload={handleUpload}
+            label="Hình ảnh công viên"
+            hint="Thêm nhiều ảnh bằng upload hoặc dán URL"
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -514,12 +409,7 @@ export default function AmenityManager() {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowModal(false)}
-              disabled={submitting}
-            >
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={submitting}>
               Hủy
             </Button>
             <Button type="submit" disabled={submitting || !formData.name}>
@@ -529,7 +419,6 @@ export default function AmenityManager() {
         </form>
       </Modal>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteId}
         onClose={() => setDeleteId(null)}

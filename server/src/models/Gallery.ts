@@ -16,8 +16,8 @@ const GallerySchema = new Schema({
   category: {
     type: String,
     required: true,
-    enum: ['căn hộ', 'nội thất', 'tiện ích'],
-    default: 'căn hộ'
+    enum: ['biệt thự song lập', 'biệt thự đơn lập', 'nhà phố liền kề'],
+    default: 'biệt thự song lập'
   },
   isActive: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 },

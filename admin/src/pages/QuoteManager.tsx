@@ -7,15 +7,20 @@ import { useToast } from '@/components/ui/Toast';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
 import { Badge } from '@/components/ui/Badge';
+import { DataTable, Column } from '@/components/ui/DataTable';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { formatDateTime } from '@/lib/utils';
 import {
   Phone,
   Mail,
   MapPin,
   MessageSquare,
-  Eye,
-  Check,
   Search,
+  Globe,
+  Trash2,
+  Copy,
+  Check,
+  X,
 } from 'lucide-react';
 
 type QuoteStatus = 'new' | 'contacted' | 'closed';
@@ -27,6 +32,7 @@ interface Quote {
   email: string;
   apartment: string;
   message: string;
+  ipAddress: string;
   status: QuoteStatus;
   createdAt: string;
 }
@@ -43,11 +49,22 @@ export default function QuoteManager() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<QuoteStatus | 'all'>('all');
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<string>('createdAt');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { toast } = useToast();
+
+  const copyPhone = (phone: string, id: string) => {
+    navigator.clipboard.writeText(phone).then(() => {
+      setCopiedId(id);
+      toast({ type: 'success', title: 'Đã copy', description: `SĐT: ${phone}` });
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
 
   useEffect(() => {
     fetchQuotes();
@@ -69,14 +86,37 @@ export default function QuoteManager() {
     try {
       await quoteApi.updateStatus(id, status);
       toast({ type: 'success', title: 'Đã cập nhật', description: `Trạng thái đã được chuyển sang "${statusConfig[status].label}".` });
-      fetchQuotes();
-      if (selectedQuote?._id === id) {
-        setSelectedQuote({ ...selectedQuote, status });
-      }
+      setQuotes((prev) =>
+        prev.map((q) => (q._id === id ? { ...q, status } : q))
+      );
     } catch (error: any) {
       const msg = error?.response?.data?.message || 'Không thể cập nhật trạng thái.';
       toast({ type: 'error', title: 'Lỗi', description: msg });
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    const quote = quotes.find((q) => q._id === id);
+    setDeleteTarget({ id, name: quote?.fullName || '' });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await quoteApi.delete(deleteTarget.id);
+      toast({ type: 'success', title: 'Đã xóa', description: 'Yêu cầu đã được xóa khỏi hệ thống.' });
+      setQuotes((prev) => prev.filter((q) => q._id !== deleteTarget.id));
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || 'Không thể xóa yêu cầu.';
+      toast({ type: 'error', title: 'Lỗi', description: msg });
+    } finally {
+      setDeleteTarget(null);
+    }
+  };
+
+  const handleSort = (key: string) => {
+    setSortDir((prev) => (sortKey === key ? (prev === 'asc' ? 'desc' : 'asc') : 'desc'));
+    setSortKey(key);
   };
 
   const filtered = useMemo(() => {
@@ -91,17 +131,32 @@ export default function QuoteManager() {
           r.fullName.toLowerCase().includes(q) ||
           r.phone.includes(q) ||
           (r.email && r.email.toLowerCase().includes(q)) ||
-          (r.apartment && r.apartment.toLowerCase().includes(q))
+          (r.apartment && r.apartment.toLowerCase().includes(q)) ||
+          (r.ipAddress && r.ipAddress.toLowerCase().includes(q))
       );
     }
     return result;
   }, [quotes, filterStatus, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      let aVal: any = (a as any)[sortKey];
+      let bVal: any = (b as any)[sortKey];
+      if (sortKey === 'createdAt') {
+        aVal = new Date(aVal).getTime();
+        bVal = new Date(bVal).getTime();
+      }
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filtered, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const paginated = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
+    return sorted.slice(start, start + PAGE_SIZE);
+  }, [sorted, page]);
 
   useEffect(() => { setPage(1); }, [filterStatus, search]);
 
@@ -112,6 +167,193 @@ export default function QuoteManager() {
     closed: quotes.filter((q) => q.status === 'closed').length,
   };
 
+  const columns: Column<Quote>[] = [
+    {
+      key: 'fullName',
+      header: 'Khách hàng',
+      sortable: true,
+      render: (q) => (
+        <div className="min-w-0">
+          <p className="font-medium text-sm truncate">{q.fullName}</p>
+          {q.email && (
+            <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+              <Mail className="w-3 h-3 flex-shrink-0" />
+              {q.email}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'phone',
+      header: 'Điện thoại',
+      width: '200px',
+      render: (q) => (
+        <div className="flex items-center gap-1.5">
+          <a
+            href={`tel:${q.phone}`}
+            className="font-medium text-sm text-primary hover:underline"
+          >
+            {q.phone}
+          </a>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              copyPhone(q.phone, q._id);
+            }}
+            className="p-1 rounded hover:bg-accent transition-colors text-muted-foreground hover:text-foreground flex-shrink-0"
+            title="Copy số điện thoại"
+          >
+            {copiedId === q._id ? (
+              <Check className="w-3.5 h-3.5 text-green-600" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
+          </button>
+        </div>
+      ),
+    },
+    {
+      key: 'apartment',
+      header: 'Căn hộ',
+      width: '150px',
+      render: (q) => (
+        <span className="text-sm text-muted-foreground flex items-center gap-1">
+          {q.apartment ? (
+            <>
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">{q.apartment}</span>
+            </>
+          ) : (
+            <span className="text-xs italic">—</span>
+          )}
+        </span>
+      ),
+    },
+    {
+      key: 'message',
+      header: 'Tin nhắn',
+      render: (q) => (
+        <div className="max-w-xs">
+          {q.message ? (
+            <p className="text-sm text-muted-foreground line-clamp-2 flex items-start gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+              <span>{q.message}</span>
+            </p>
+          ) : (
+            <span className="text-xs italic text-muted-foreground">Không có</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'ipAddress',
+      header: 'IP',
+      width: '130px',
+      sortable: true,
+      render: (q) => (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Globe className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="font-mono">{q.ipAddress || '—'}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'createdAt',
+      header: 'Ngày gửi',
+      width: '140px',
+      sortable: true,
+      render: (q) => (
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
+          {formatDateTime(q.createdAt)}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Trạng thái',
+      width: '220px',
+      render: (q) => (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Badge variant={statusConfig[q.status].variant}>
+            {statusConfig[q.status].label}
+          </Badge>
+          {q.status === 'new' && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-xs text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-950/30 hover:border-green-300"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStatus(q._id, 'contacted');
+                }}
+              >
+                Đã liên hệ
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStatus(q._id, 'closed');
+                }}
+              >
+                Hủy
+              </Button>
+            </>
+          )}
+          {q.status === 'contacted' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateStatus(q._id, 'closed');
+              }}
+            >
+              Hủy
+            </Button>
+          )}
+          {q.status === 'closed' && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateStatus(q._id, 'new');
+              }}
+            >
+              Mở lại
+            </Button>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: '48px',
+      render: (q) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete(q._id);
+          }}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      ),
+    },
+  ];
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -120,15 +362,30 @@ export default function QuoteManager() {
             <div key={i} className="h-9 w-20 rounded" />
           ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SkeletonQuoteList count={4} />
-          <div className="bg-card rounded-xl border p-6 h-fit sticky top-6">
-            <div className="h-6 w-32 mb-6" />
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-16 rounded" />
-              ))}
-            </div>
+        <div className="bg-card rounded-xl border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-muted/40">
+                  {columns.map((col) => (
+                    <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                      {col.header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse border-b">
+                    {columns.map((col) => (
+                      <td key={col.key} className="px-4 py-3">
+                        <div className="h-5 bg-muted rounded w-24" />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -167,7 +424,7 @@ export default function QuoteManager() {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Tìm theo tên, số điện thoại, email..."
+          placeholder="Tìm theo tên, SĐT, email, IP..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
@@ -183,167 +440,30 @@ export default function QuoteManager() {
         />
       ) : (
         <>
-          {/* List + Detail */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Quote Cards */}
-            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-              {paginated.map((quote) => {
-                const cfg = statusConfig[quote.status];
-                return (
-                  <div
-                    key={quote._id}
-                    onClick={() => setSelectedQuote(quote)}
-                    className={`bg-card rounded-xl border p-4 cursor-pointer transition-all hover:shadow-md ${
-                      selectedQuote?._id === quote._id ? 'ring-2 ring-primary' : ''
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold">{quote.fullName}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {formatDateTime(quote.createdAt)}
-                        </p>
-                      </div>
-                      <Badge variant={cfg.variant}>{cfg.label}</Badge>
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3.5 h-3.5" />
-                        {quote.phone}
-                      </span>
-                      {quote.apartment && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5" />
-                          {quote.apartment}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Quote Detail */}
-            <div className="bg-card rounded-xl border p-6 h-fit sticky top-6">
-              {selectedQuote ? (
-                <>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold">Chi tiết yêu cầu</h3>
-                    <Badge variant={statusConfig[selectedQuote.status].variant}>
-                      {statusConfig[selectedQuote.status].label}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full btn-gold-shimmer /10 text-primary flex items-center justify-center font-semibold">
-                        {selectedQuote.fullName.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{selectedQuote.fullName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDateTime(selectedQuote.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <InfoRow icon={<Phone className="w-4 h-4" />} label="Điện thoại">
-                        <a href={`tel:${selectedQuote.phone}`} className="font-medium text-primary hover:underline">
-                          {selectedQuote.phone}
-                        </a>
-                      </InfoRow>
-
-                      {selectedQuote.email && (
-                        <InfoRow icon={<Mail className="w-4 h-4" />} label="Email">
-                          <a href={`mailto:${selectedQuote.email}`} className="font-medium text-primary hover:underline">
-                            {selectedQuote.email}
-                          </a>
-                        </InfoRow>
-                      )}
-
-                      {selectedQuote.apartment && (
-                        <InfoRow icon={<MapPin className="w-4 h-4" />} label="Căn hộ">
-                          <span className="font-medium">{selectedQuote.apartment}</span>
-                        </InfoRow>
-                      )}
-
-                      {selectedQuote.message && (
-                        <InfoRow icon={<MessageSquare className="w-4 h-4" />} label="Tin nhắn">
-                          <span className="font-medium">{selectedQuote.message}</span>
-                        </InfoRow>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="pt-4 border-t space-y-2">
-                      <p className="text-sm text-muted-foreground">Cập nhật trạng thái</p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedQuote.status !== 'contacted' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUpdateStatus(selectedQuote._id, 'contacted')}
-                          >
-                            <Phone className="w-4 h-4 mr-1" />
-                            Đã liên hệ
-                          </Button>
-                        )}
-                        {selectedQuote.status !== 'closed' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUpdateStatus(selectedQuote._id, 'closed')}
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            Đóng yêu cầu
-                          </Button>
-                        )}
-                        {selectedQuote.status !== 'new' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleUpdateStatus(selectedQuote._id, 'new')}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Đánh dấu mới
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  Chọn một yêu cầu để xem chi tiết
-                </div>
-              )}
-            </div>
-          </div>
+          <DataTable
+            columns={columns}
+            data={paginated}
+            keyExtractor={(q) => q._id}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={handleSort}
+            emptyMessage="Không có yêu cầu nào"
+          />
 
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
-    </div>
-  );
-}
 
-function InfoRow({
-  icon,
-  label,
-  children,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-      <div className="text-muted-foreground mt-0.5">{icon}</div>
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        {children}
-      </div>
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Xóa yêu cầu"
+        description={`Bạn có chắc muốn xóa yêu cầu từ "${deleteTarget?.name}" không? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="destructive"
+      />
     </div>
   );
 }

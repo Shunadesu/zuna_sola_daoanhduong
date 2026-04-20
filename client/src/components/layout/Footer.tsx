@@ -31,7 +31,7 @@ export function Footer() {
             </div>
 
             <p className="text-gray-600 max-w-md leading-relaxed">
-              Dự án căn hộ cao cấp tại vị trí đắc địa bậc nhất Quận 7, mang đến cuộc sống hoàn hảo 
+              Dự án căn hộ cao cấp tại vị trí đắc địa bậc nhất Quận 2, mang đến cuộc sống hoàn hảo 
               với tiêu chuẩn quốc tế và tiện ích đẳng cấp cho cư dân.
             </p>
 
@@ -95,7 +95,7 @@ export function Footer() {
                     <Phone className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">Hotline</p>
+                    <p className="text-xs text-gray-500">Hotline</p>
                     <p className="font-medium text-gray-800">0845228379</p>
                   </div>
                 </a>
@@ -109,7 +109,7 @@ export function Footer() {
                     <Mail className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">Email</p>
+                    <p className="text-xs text-gray-500">Email</p>
                     <p className="font-medium text-gray-800 text-sm break-all">thanhpham.02092002@gmail.com</p>
                   </div>
                 </a>
@@ -120,7 +120,7 @@ export function Footer() {
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">Địa chỉ</p>
+                    <p className="text-xs text-gray-500">Địa chỉ</p>
                     <p className="font-medium text-gray-800 text-sm">{ADDRESS}</p>
                   </div>
                 </div>

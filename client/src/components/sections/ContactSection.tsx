@@ -14,6 +14,8 @@ import api from '@/lib/api';
 const quoteSchema = z.object({
   fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
   phone: z.string().min(10, 'Số điện thoại không hợp lệ'),
+  email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
+  apartment: z.string().optional(),
 });
 
 type QuoteFormData = z.infer<typeof quoteSchema>;
@@ -86,13 +88,13 @@ export function ContactSection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm text-white/80 text-sm font-medium rounded-full mb-4">
+            <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-4">
               Liên hệ
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
               Đăng Ký Nhận Báo Giá
             </h2>
-            <p className="text-lg text-white/70 mb-10">
+            <p className="text-lg text-white/80 mb-10">
               Điền thông tin để nhận tư vấn và báo giá chi tiết về dự án Sola Đảo Ảnh Dương
             </p>
 
@@ -107,7 +109,7 @@ export function ContactSection() {
                   <Phone className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/60 mb-1">Hotline</p>
+                  <p className="text-sm text-white/80 mb-1">Hotline</p>
                   <p className="text-xl font-bold text-white">{HOTLINE}</p>
                 </div>
               </motion.a>
@@ -122,7 +124,7 @@ export function ContactSection() {
                   <Mail className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/60 mb-1">Email</p>
+                  <p className="text-sm text-white/80 mb-1">Email</p>
                   <p className="text-lg font-semibold text-white break-all">{EMAIL}</p>
                 </div>
               </motion.a>
@@ -147,10 +149,10 @@ export function ContactSection() {
                     <CheckCircle className="w-10 h-10 text-green-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4">Gửi Thành Công!</h3>
-                  <p className="text-white/70 mb-8 max-w-sm mx-auto">
+                  <p className="text-white/80 mb-8 max-w-sm mx-auto">
                     Cảm ơn bạn đã quan tâm đến dự án. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.
                   </p>
-                  <Button onClick={reset} variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button onClick={reset} variant="outline" className="border-white/30 text-black hover:bg-white/10">
                     Gửi yêu cầu khác
                   </Button>
                 </motion.div>
@@ -161,7 +163,7 @@ export function ContactSection() {
                     <Input
                       id="fullName"
                       placeholder="Nhập họ và tên"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/30"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
                       error={errors.fullName?.message}
                       {...register('fullName')}
                     />
@@ -173,10 +175,36 @@ export function ContactSection() {
                       id="phone"
                       type="tel"
                       placeholder="Nhập số điện thoại"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/30"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
                       error={errors.phone?.message}
                       {...register('phone')}
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email" className="text-white/90">Email (tuỳ chọn)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Nhập email của bạn"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
+                      error={errors.email?.message}
+                      {...register('email')}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="apartment" className="text-white/90">Căn hộ quan tâm</Label>
+                    <select
+                      id="apartment"
+                      {...register('apartment')}
+                      className="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30 outline-none transition-all"
+                    >
+                      <option value="">-- Chọn loại căn hộ --</option>
+                      <option value="biệt thự song lập">Biệt thự song lập</option>
+                      <option value="biệt thự đơn lập">Biệt thự đơn lập</option>
+                      <option value="nhà phố liền kề">Nhà phố liền kề</option>
+                    </select>
                   </div>
 
                   <Button
@@ -189,7 +217,7 @@ export function ContactSection() {
                     Gửi Yêu Cầu
                   </Button>
 
-                  <p className="text-xs text-center text-white/50">
+                  <p className="text-xs text-center text-white/70">
                     Bằng việc gửi yêu cầu, bạn đồng ý với chính sách bảo mật của chúng tôi.
                   </p>
                 </form>

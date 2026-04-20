@@ -4,12 +4,13 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { Header, Footer, SmoothScroll } from '@/components/layout';
 import { FloatingContactBar } from '@/components/public';
-import { HeroSection, OverviewSection, LocationAdvantageSection, AmenitiesSection, GallerySection, ContactSection } from '@/components/sections';
+import { HeroSection, OverviewSection, AmenitiesSection, GallerySection, ContactSection } from '@/components/sections';
 import { trackApi } from '@/lib/api';
+import { OverviewSection2 } from './components/sections/OverviewSection2';
 
 const SITE_CONFIG = {
   name: 'Sola Đảo Ảnh Dương',
-  description: 'Dự án căn hộ cao cấp tại Đảo Ảnh Dương, Quận 7, TP. Hồ Chí Minh. Vị trí đắc địa, tiện ích đẳng cấp.',
+  description: 'Dự án căn hộ cao cấp tại Đảo Ảnh Dương, Quận 2, TP. Hồ Chí Minh. Vị trí đắc địa, tiện ích đẳng cấp.',
   url: 'https://sola.vn',
   phone: '0909 123 456',
   email: 'info@sola.vn',
@@ -29,9 +30,9 @@ function Home() {
   return (
     <>
       <Helmet>
-        <title>{SITE_CONFIG.name} | Căn Hộ Cao Cấp Quận 7</title>
+        <title>{SITE_CONFIG.name} | Căn Hộ Cao Cấp Quận 2</title>
         <meta name="description" content={SITE_CONFIG.description} />
-        <meta name="keywords" content="căn hộ cao cấp, đảo ảnh dương, quận 7, bất động sản, hồ chí minh" />
+        <meta name="keywords" content="căn hộ cao cấp, đảo ảnh dương, Quận 2, bất động sản, hồ chí minh" />
         <meta property="og:title" content={`${SITE_CONFIG.name} | Căn Hộ Cao Cấp`} />
         <meta property="og:description" content={SITE_CONFIG.description} />
         <meta property="og:image" content={SITE_CONFIG.ogImage} />
@@ -54,7 +55,7 @@ function Home() {
             address: {
               '@type': 'PostalAddress',
               streetAddress: 'Đường Đại Lộ Võ Văn Kiệt',
-              addressLocality: 'Quận 7',
+              addressLocality: 'Quận 2',
               addressRegion: 'TP. Hồ Chí Minh',
               addressCountry: 'VN',
             },
@@ -63,10 +64,12 @@ function Home() {
       </Helmet>
 
       <HeroSection />
-      <LocationAdvantageSection />
       <OverviewSection />
-      <AmenitiesSection />
       <GallerySection />
+
+      <OverviewSection2 />
+      <AmenitiesSection />
+
       <ContactSection />
     </>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api, { uploadApi } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -7,14 +7,14 @@ import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { DataTable, Column } from '@/components/ui/DataTable';
+import { ImageInput } from '@/components/ui/ImageInput';
 import {
   Plus,
   Pencil,
   Trash2,
   Image as ImageIcon,
-  Upload,
-  Loader2,
+  Search,
   X,
 } from 'lucide-react';
 
@@ -37,10 +37,22 @@ interface GalleryFormData {
 }
 
 const CATEGORIES = [
-  { value: 'căn hộ', label: 'Căn hộ' },
-  { value: 'nội thất', label: 'Nội thất' },
-  { value: 'tiện ích', label: 'Tiện ích' },
+  { value: 'biệt thự song lập', label: 'Biệt thự song lập' },
+  { value: 'biệt thự đơn lập', label: 'Biệt thự đơn lập' },
+  { value: 'nhà phố liền kề', label: 'Nhà phố liền kề' },
 ];
+
+const CATEGORY_COLORS: Record<string, string> = {
+  'biệt thự song lập': 'bg-blue-100 text-blue-700',
+  'biệt thự đơn lập': 'bg-purple-100 text-purple-700',
+  'nhà phố liền kề': 'bg-green-100 text-green-700',
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  'biệt thự song lập': 'Biệt thự song lập',
+  'biệt thự đơn lập': 'Biệt thự đơn lập',
+  'nhà phố liền kề': 'Nhà phố liền kề',
+};
 
 export default function GalleryManager() {
   const [galleries, setGalleries] = useState<Gallery[]>([]);
@@ -49,14 +61,17 @@ export default function GalleryManager() {
   const [editingGallery, setEditingGallery] = useState<Gallery | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageDragOver, setImageDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterActive, setFilterActive] = useState<string>('all');
+  const [sortKey, setSortKey] = useState('sortOrder');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const [formData, setFormData] = useState<GalleryFormData>({
     title: '',
     imageUrl: '',
-    category: 'căn hộ',
+    category: 'biệt thự song lập',
     isActive: true,
     sortOrder: 0,
   });
@@ -135,181 +150,190 @@ export default function GalleryManager() {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', imageUrl: '', category: 'căn hộ', isActive: true, sortOrder: 0 });
-    setUploadingImage(false);
+    setFormData({ title: '', imageUrl: '', category: 'biệt thự song lập', isActive: true, sortOrder: 0 });
   };
 
-  const handleImageUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn file hình ảnh.' });
-      return;
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      toast({ type: 'error', title: 'Lỗi', description: 'File quá lớn (tối đa 50MB).' });
-      return;
-    }
-    setUploadingImage(true);
-    try {
-      const response = await uploadApi.uploadImage(file);
-      setFormData((prev) => ({ ...prev, imageUrl: response.data.data.url }));
-      toast({ type: 'success', title: 'Thành công', description: 'Hình ảnh đã được tải lên.' });
-    } catch (error: any) {
-      const msg = error?.response?.data?.message || 'Không thể tải ảnh lên.';
-      toast({ type: 'error', title: 'Lỗi', description: msg });
-    } finally {
-      setUploadingImage(false);
+  const handleUpload = async (file: File): Promise<string> => {
+    const response = await uploadApi.uploadImage(file);
+    return response.data.data.url as string;
+  };
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageUpload(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setImageDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleImageUpload(file);
-  };
-
-  const getCategoryLabel = (category: string) => {
-    return CATEGORIES.find((c) => c.value === category)?.label || category;
-  };
-
-  const getCategoryBadgeClass = (category: string) => {
-    switch (category) {
-      case 'căn hộ': return 'bg-blue-100 text-blue-700';
-      case 'nội thất': return 'bg-purple-100 text-purple-700';
-      case 'tiện ích': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
+  const filtered = useMemo(() => {
+    let result = [...galleries];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((g) => g.title.toLowerCase().includes(q));
     }
-  };
+    if (filterCategory !== 'all') {
+      result = result.filter((g) => g.category === filterCategory);
+    }
+    if (filterActive !== 'all') {
+      result = result.filter((g) => g.isActive === (filterActive === 'active'));
+    }
+    result.sort((a, b) => {
+      const aVal = (a as Record<string, unknown>)[sortKey];
+      const bVal = (b as Record<string, unknown>)[sortKey];
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return result;
+  }, [galleries, search, filterCategory, filterActive, sortKey, sortDir]);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-8 w-64 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-48 bg-muted rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-card rounded-xl border overflow-hidden">
-              <div className="aspect-video bg-muted animate-pulse" />
-              <div className="p-4 space-y-2">
-                <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-1/2 bg-muted rounded animate-pulse" />
-              </div>
+  const columns: Column<Gallery>[] = [
+    {
+      key: 'thumb',
+      header: 'Ảnh',
+      width: '80px',
+      render: (item) => (
+        <div className="w-16 h-12 rounded overflow-hidden bg-muted flex-shrink-0">
+          {item.imageUrl ? (
+            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-5 h-5 text-muted-foreground" />
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      key: 'title',
+      header: 'Tiêu đề',
+      sortable: true,
+      render: (item) => (
+        <span className="font-medium">{item.title}</span>
+      ),
+    },
+    {
+      key: 'category',
+      header: 'Danh mục',
+      width: '140px',
+      render: (item) => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${CATEGORY_COLORS[item.category] || 'bg-gray-100 text-gray-700'}`}>
+          {CATEGORY_LABELS[item.category] || item.category}
+        </span>
+      ),
+    },
+    {
+      key: 'isActive',
+      header: 'Trạng thái',
+      width: '120px',
+      render: (item) => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+          item.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+        }`}>
+          {item.isActive ? 'Hiển thị' : 'Đã ẩn'}
+        </span>
+      ),
+    },
+    {
+      key: 'sortOrder',
+      header: 'Thứ tự',
+      width: '80px',
+      sortable: true,
+      render: (item) => (
+        <span className="text-sm text-muted-foreground">{item.sortOrder}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Thao tác',
+      width: '120px',
+      render: (item) => (
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+            <Pencil className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setDeleteId(item._id)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Quản lý Thư Viện Ảnh</h2>
-          <p className="text-muted-foreground">Thêm, sửa, xóa hình ảnh theo danh mục</p>
+          <p className="text-muted-foreground text-sm">Thêm, sửa, xóa hình ảnh theo danh mục</p>
         </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setEditingGallery(null);
-            setShowModal(true);
-          }}
-        >
+        <Button onClick={() => { resetForm(); setEditingGallery(null); setShowModal(true); }}>
           <Plus className="w-4 h-4 mr-2" />
           Thêm ảnh
         </Button>
       </div>
 
-      {/* Grid */}
-      {galleries.length === 0 ? (
-        <EmptyState
-          title="Chưa có ảnh nào"
-          description="Bắt đầu bằng cách thêm ảnh vào thư viện."
-          action={() => {
-            resetForm();
-            setEditingGallery(null);
-            setShowModal(true);
-          }}
-          actionLabel="Thêm ảnh"
-        />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {galleries.map((item) => (
-            <div
-              key={item._id}
-              className="bg-card rounded-xl border overflow-hidden group hover:shadow-md transition-shadow"
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm kiếm tiêu đề..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <div className="aspect-video relative bg-muted">
-                {item.imageUrl ? (
-                  <>
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Pencil className="w-4 h-4 mr-1" />
-                          Sửa
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setDeleteId(item._id)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Xóa
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                  </div>
-                )}
-                {!item.isActive && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm font-medium">
-                      Đã ẩn
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold truncate">{item.title}</h3>
-                <div className="flex items-center justify-between mt-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${getCategoryBadgeClass(item.category)}`}>
-                    {getCategoryLabel(item.category)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Thứ tự: {item.sortOrder}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
-      )}
+        <div className="w-full sm:w-40">
+          <Select
+            value={filterCategory}
+            onChange={setFilterCategory}
+            options={[
+              { value: 'all', label: 'Tất cả danh mục' },
+              ...CATEGORIES,
+            ]}
+          />
+        </div>
+        <div className="w-full sm:w-44">
+          <Select
+            value={filterActive}
+            onChange={setFilterActive}
+            options={[
+              { value: 'all', label: 'Tất cả trạng thái' },
+              { value: 'active', label: 'Đang hiển thị' },
+              { value: 'inactive', label: 'Đã ẩn' },
+            ]}
+          />
+        </div>
+      </div>
 
-      {/* Form Modal */}
+      <DataTable
+        columns={columns}
+        data={filtered}
+        keyExtractor={(item) => item._id}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={handleSort}
+        loading={isLoading}
+        skeletonRows={5}
+        emptyMessage="Chưa có ảnh nào"
+      />
+
       <Modal
         open={showModal}
         onClose={() => !submitting && setShowModal(false)}
@@ -340,63 +364,29 @@ export default function GalleryManager() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Hình ảnh</Label>
-            <div
-              className={`
-                relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
-                ${imageDragOver ? 'border-primary' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}
-                ${uploadingImage ? 'pointer-events-none opacity-60' : ''}
-              `}
-              onDragOver={(e) => { e.preventDefault(); setImageDragOver(true); }}
-              onDragLeave={() => setImageDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => !uploadingImage && fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              {uploadingImage ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Đang tải lên...</p>
-                </div>
-              ) : formData.imageUrl ? (
-                <div className="space-y-3">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Preview"
-                    className="max-h-48 mx-auto rounded-lg object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <p className="text-xs text-muted-foreground">Kéo thả hoặc click để thay ảnh khác</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                    {imageDragOver ? (
-                      <Upload className="w-6 h-6 text-primary" />
-                    ) : (
-                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {imageDragOver ? 'Thả file vào đây' : 'Kéo thả ảnh hoặc click để chọn'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP (tối đa 50MB)</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {formData.imageUrl ? 'Hình ảnh đã được tải lên server.' : 'Chưa có hình ảnh nào được chọn.'}
-            </p>
-          </div>
+          <ImageInput
+            value={formData.imageUrl}
+            onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+            onUpload={async (file) => {
+              if (file.size > 50 * 1024 * 1024) {
+                toast({ type: 'error', title: 'Lỗi', description: 'File quá lớn (tối đa 50MB).' });
+                return;
+              }
+              if (!file.type.startsWith('image/')) {
+                toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn file hình ảnh.' });
+                return;
+              }
+              try {
+                const url = await handleUpload(file);
+                setFormData((prev) => ({ ...prev, imageUrl: url }));
+                toast({ type: 'success', title: 'Thành công', description: 'Hình ảnh đã được tải lên.' });
+              } catch {
+                toast({ type: 'error', title: 'Lỗi', description: 'Không thể tải ảnh lên.' });
+              }
+            }}
+            label="Hình ảnh"
+            hint="Dùng URL từ bên ngoài hoặc upload ảnh lên server"
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -427,12 +417,7 @@ export default function GalleryManager() {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowModal(false)}
-              disabled={submitting}
-            >
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={submitting}>
               Hủy
             </Button>
             <Button type="submit" disabled={submitting || !formData.title || !formData.imageUrl}>
@@ -442,7 +427,6 @@ export default function GalleryManager() {
         </form>
       </Modal>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteId}
         onClose={() => setDeleteId(null)}

@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion, AnimatePresence } from 'framer-motion';
 import { bannerApi } from '@/lib/api';
+import { PerspectiveSection } from './PerspectiveSection';
 import type { Banner } from '@/lib/api';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -89,7 +90,8 @@ export function HeroSection() {
   }
 
   return (
-    <section id="home" className="relative h-screen overflow-hidden">
+    <>
+      <section id="home" className="relative h-screen overflow-hidden">
       <Swiper
         ref={swiperRef}
         modules={[Autoplay, Pagination, Navigation]}
@@ -189,17 +191,21 @@ export function HeroSection() {
         transition={{ delay: 1.2 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
       >
-        <div className="flex flex-col items-center text-white/70 gap-2">
+        <div className="flex flex-col items-center text-white gap-2">
           <span className="text-xs font-medium tracking-wider uppercase">Cuộn xuống</span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-6 h-9 border-2 border-white/40 rounded-full flex justify-center pt-1.5"
+            className="w-6 h-9 border-2 border-white/60 rounded-full flex justify-center pt-1.5"
           >
-            <div className="w-1 h-2 bg-white/60 rounded-full" />
+            <div className="w-1 h-2 bg-white/80 rounded-full" />
           </motion.div>
         </div>
       </motion.div>
     </section>
+
+    {/* Phối cảnh nằm dưới Hero */}
+    <PerspectiveSection />
+    </>
   );
 }
