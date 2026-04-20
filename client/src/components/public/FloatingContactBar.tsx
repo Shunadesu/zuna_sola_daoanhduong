@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, MessageCircle, FileText, X, Send } from 'lucide-react';
+import { Phone, MessageCircle, FileText, X, Send, Calculator } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useContactStore } from '@/store';
 import { bannerApi } from '@/lib/api';
@@ -257,6 +257,43 @@ export function FloatingContactBar() {
 
   return (
     <>
+      {/* Left: Báo giá ngay button */}
+      <div className="fixed left-4 bottom-4 z-50">
+        <motion.button
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1, type: 'spring', stiffness: 200 }}
+          onClick={() => setShowQuoteModal(true)}
+          className="group relative flex items-center gap-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white px-5 py-3.5 rounded-full transition-all hover:scale-105 cursor-pointer"
+        >
+          {/* Pulse ring */}
+          <span className="absolute inset-0 rounded-full bg-amber-400 opacity-30" />
+
+          {/* Icon */}
+          <div className="relative w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/30 transition-colors">
+            <Calculator className="w-5 h-5" />
+          </div>
+
+          {/* Text */}
+          <div className="relative flex flex-col items-start">
+            <span className="text-xs font-medium text-white/80 leading-none mb-0.5">Nhấn ngay</span>
+            <span className="text-sm font-bold leading-none">Báo giá ngay</span>
+          </div>
+
+          {/* Arrow */}
+          <motion.span
+            animate={{ x: [0, 4, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+            className="relative ml-1"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.span>
+        </motion.button>
+      </div>
+
+      {/* Right: Contact buttons */}
       <div className="fixed right-4 bottom-4 z-50 flex flex-col gap-3">
         <AnimatePresence>
           {isExpanded && (
