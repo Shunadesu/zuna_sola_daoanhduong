@@ -8,6 +8,7 @@
   },
   "regions": ["sin1"],
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://sunnydemo.site/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://sunnydemo.site/api/:path*" },
+    { "source": "/((?!api|_next|_vercel|.*\\..*).*)", "destination": "/index.html" }
   ]
 }
