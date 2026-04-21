@@ -180,8 +180,8 @@ export default function GalleryManager() {
       result = result.filter((g) => g.isActive === (filterActive === 'active'));
     }
     result.sort((a, b) => {
-      const aVal = (a as Record<string, unknown>)[sortKey];
-      const bVal = (b as Record<string, unknown>)[sortKey];
+      const aVal = (a as unknown as Record<string, unknown>)[sortKey];
+      const bVal = (b as unknown as Record<string, unknown>)[sortKey];
       if (aVal == null) return 1;
       if (bVal == null) return -1;
       const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
@@ -433,8 +433,8 @@ export default function GalleryManager() {
         onConfirm={handleDelete}
         title="Xóa ảnh"
         description="Bạn có chắc muốn xóa ảnh này? Hành động này không thể hoàn tác."
-        confirmLabel="Xóa"
-        variant="danger"
+        confirmText="Xóa"
+        variant="destructive"
         loading={submitting}
       />
     </div>

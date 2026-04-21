@@ -13,7 +13,6 @@ import {
   AlertCircle,
   MessageSquare,
   Copy,
-  Check,
   Eye,
   EyeOff,
   User,

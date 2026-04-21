@@ -1,8 +1,6 @@
-import * as React from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ConfirmDialogProps {
   open: boolean;

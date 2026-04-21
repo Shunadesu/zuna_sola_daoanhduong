@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { quoteApi } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { SkeletonQuoteList } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
@@ -11,7 +10,6 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { formatDateTime } from '@/lib/utils';
 import {
-  Phone,
   Mail,
   MapPin,
   MessageSquare,
@@ -20,7 +18,6 @@ import {
   Trash2,
   Copy,
   Check,
-  X,
 } from 'lucide-react';
 
 type QuoteStatus = 'new' | 'contacted' | 'closed';

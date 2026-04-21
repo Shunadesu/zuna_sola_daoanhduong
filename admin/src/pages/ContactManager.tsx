@@ -403,8 +403,8 @@ export default function ContactManager() {
         onConfirm={handleDelete}
         title="Xóa Liên hệ"
         description="Bạn có chắc muốn xóa liên hệ này? Hành động này không thể hoàn tác."
-        confirmLabel="Xóa"
-        variant="danger"
+        confirmText="Xóa"
+        variant="destructive"
         loading={submitting}
       />
     </div>
