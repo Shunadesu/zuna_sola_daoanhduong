@@ -19,5 +19,4 @@ VisitSchema.index({ ip: 1, createdAt: -1 });
 VisitSchema.index({ createdAt: -1 });
 
 export const Visit: Model<IVisit> = mongoose.model<IVisit>('Visit', VisitSchema);
-export type { IVisit };
 export default Visit;

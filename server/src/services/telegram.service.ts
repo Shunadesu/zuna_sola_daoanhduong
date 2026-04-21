@@ -13,8 +13,9 @@ class TelegramService {
     return process.env.TELEGRAM_BOT_TOKEN;
   }
 
-  private get chatId(): string | undefined {
-    return process.env.TELEGRAM_CHAT_ID;
+  private get chatIds(): string[] {
+    const raw = process.env.TELEGRAM_CHAT_IDS || process.env.TELEGRAM_CHAT_ID || '';
+    return raw.split(',').map(id => id.trim()).filter(Boolean);
   }
 
   private get apiUrl(): string {
@@ -23,7 +24,7 @@ class TelegramService {
   }
 
   isConfigured(): boolean {
-    return !!(this.botToken && this.chatId);
+    return !!(this.botToken && this.chatIds.length > 0);
   }
 
   private async sendMessage(text: string): Promise<boolean> {
@@ -32,27 +33,27 @@ class TelegramService {
       return false;
     }
 
-    try {
-      const response = await fetch(`${this.apiUrl}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: this.chatId,
-          text,
-          parse_mode: 'Markdown',
-        }),
-      });
+    const results = await Promise.allSettled(
+      this.chatIds.map(chatId =>
+        fetch(`${this.apiUrl}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+            parse_mode: 'Markdown',
+          }),
+        })
+      )
+    );
 
-      if (!response.ok) {
-        console.error('Telegram API error:', await response.text());
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Failed to send Telegram message:', error);
+    const failures = results.filter(r => r.status === 'rejected' || !((r as PromiseFulfilledResult<unknown>).value as { ok?: boolean }).ok);
+    if (failures.length > 0) {
+      console.error('Some Telegram messages failed to send');
       return false;
     }
+
+    return true;
   }
 
   async sendQuoteNotification(quote: QuoteData & { ipAddress?: string }): Promise<boolean> {

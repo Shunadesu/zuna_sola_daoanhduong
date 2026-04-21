@@ -13,5 +13,4 @@ const AdminSchema = new Schema({
 }, { timestamps: true });
 
 export const Admin: Model<IAdmin> = mongoose.model<IAdmin>('Admin', AdminSchema);
-export type { IAdmin };
 export default Admin;

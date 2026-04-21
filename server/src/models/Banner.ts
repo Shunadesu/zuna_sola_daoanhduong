@@ -23,5 +23,4 @@ const BannerSchema = new Schema({
 BannerSchema.index({ isActive: 1, sortOrder: 1 });
 
 export const Banner: Model<IBanner> = mongoose.model<IBanner>('Banner', BannerSchema);
-export type { IBanner };
 export default Banner;

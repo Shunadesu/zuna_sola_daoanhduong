@@ -29,5 +29,4 @@ const OverviewSchema = new Schema({
 OverviewSchema.index({ isActive: 1, sortOrder: 1 });
 
 export const Overview: Model<IOverview> = mongoose.model<IOverview>('Overview', OverviewSchema);
-export type { IOverview };
 export default Overview;

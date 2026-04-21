@@ -6,18 +6,28 @@ const router = Router();
 router.use(authMiddleware);
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
+
+function parseChatIds(raw?: string): string[] {
+  if (!raw) return [];
+  return raw.split(',').map(id => id.trim()).filter(Boolean);
+}
+
+const getChatIds = (): string[] => {
+  return parseChatIds(process.env.TELEGRAM_CHAT_IDS || process.env.TELEGRAM_CHAT_ID);
+};
 
 // GET - Lấy thông tin cấu hình Telegram hiện tại
 router.get('/', async (_req: AuthRequest, res: Response) => {
   try {
+    const chatIds = getChatIds();
     res.json({
       success: true,
       data: {
         botToken: BOT_TOKEN ? `${BOT_TOKEN.substring(0, 10)}...${BOT_TOKEN.substring(BOT_TOKEN.length - 5)}` : '',
         botTokenRaw: BOT_TOKEN,
-        chatId: CHAT_ID,
-        isConfigured: !!(BOT_TOKEN && CHAT_ID),
+        chatIds,
+        chatIdsRaw: chatIds.join(', '),
+        isConfigured: !!(BOT_TOKEN && chatIds.length > 0),
       },
     });
   } catch (error) {
@@ -29,10 +39,22 @@ router.get('/', async (_req: AuthRequest, res: Response) => {
 // PUT - Cập nhật cấu hình Telegram (ghi vào file .env)
 router.put('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { botToken, chatId } = req.body;
+    const { botToken, chatIds: chatIdsInput } = req.body;
 
-    if (!botToken || !chatId) {
-      res.status(400).json({ success: false, message: 'Bot token và Chat ID đều bắt buộc' });
+    if (!botToken || !chatIdsInput) {
+      res.status(400).json({ success: false, message: 'Bot token và Chat ID (ít nhất 1) bắt buộc' });
+      return;
+    }
+
+    // chatIdsInput có thể là string (comma-separated) hoặc array
+    const chatIdsRaw = Array.isArray(chatIdsInput)
+      ? chatIdsInput.join(',')
+      : chatIdsInput;
+
+    const chatIds = parseChatIds(chatIdsRaw);
+
+    if (chatIds.length === 0) {
+      res.status(400).json({ success: false, message: 'Phải có ít nhất 1 Chat ID hợp lệ' });
       return;
     }
 
@@ -56,20 +78,29 @@ router.put('/', async (req: AuthRequest, res: Response) => {
       }
     };
 
+    // Xóa TELEGRAM_CHAT_ID cũ nếu có
+    const removeLine = (key: string) => {
+      const regex = new RegExp(`^${key}=.*$\n?`, 'm');
+      envContent = envContent.replace(regex, '');
+    };
+
     updateLine('TELEGRAM_BOT_TOKEN', botToken.trim());
-    updateLine('TELEGRAM_CHAT_ID', chatId.trim());
+    removeLine('TELEGRAM_CHAT_ID');
+    updateLine('TELEGRAM_CHAT_IDS', chatIdsRaw.trim());
 
     fs.writeFileSync(envPath, envContent.trim() + '\n');
 
     process.env.TELEGRAM_BOT_TOKEN = botToken.trim();
-    process.env.TELEGRAM_CHAT_ID = chatId.trim();
+    process.env.TELEGRAM_CHAT_IDS = chatIdsRaw.trim();
+    delete process.env.TELEGRAM_CHAT_ID;
 
     res.json({
       success: true,
       message: 'Cấu hình Telegram đã được lưu',
       data: {
         botToken: `${botToken.trim().substring(0, 10)}...${botToken.trim().substring(botToken.trim().length - 5)}`,
-        chatId: chatId.trim(),
+        chatIds,
+        chatIdsRaw: chatIds.join(', '),
         isConfigured: true,
       },
     });
@@ -82,12 +113,21 @@ router.put('/', async (req: AuthRequest, res: Response) => {
 // POST - Gửi tin nhắn test đến Telegram
 router.post('/test', async (req: AuthRequest, res: Response) => {
   try {
-    const { botToken, chatId } = req.body;
+    const { botToken, chatId, chatIds: chatIdsInput } = req.body;
 
     const token = botToken || process.env.TELEGRAM_BOT_TOKEN;
-    const chat = chatId || process.env.TELEGRAM_CHAT_ID;
 
-    if (!token || !chat) {
+    let targets: string[] = [];
+    if (chatIdsInput) {
+      const raw = Array.isArray(chatIdsInput) ? chatIdsInput.join(',') : chatIdsInput;
+      targets = parseChatIds(raw);
+    } else if (chatId) {
+      targets = [chatId];
+    } else {
+      targets = getChatIds();
+    }
+
+    if (!token || targets.length === 0) {
       res.status(400).json({ success: false, message: 'Bot token và Chat ID bắt buộc' });
       return;
     }
@@ -97,27 +137,36 @@ router.post('/test', async (req: AuthRequest, res: Response) => {
 
     const testMessage = `✅ *Bot đã kết nối thành công!*\n\n🕐 ${new Date().toLocaleString('vi-VN')}\n📋 Nguồn: Sola Admin Panel`;
 
-    const response = await fetch(`${apiUrl}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chat,
-        text: testMessage,
-        parse_mode: 'Markdown',
-      }),
-    });
+    const results = await Promise.allSettled(
+      targets.map(chat =>
+        fetch(`${apiUrl}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chat,
+            text: testMessage,
+            parse_mode: 'Markdown',
+          }),
+        })
+      )
+    );
 
-    const data = await response.json() as any;
+    const failures = results.filter(
+      r => r.status === 'rejected' || !((r as PromiseFulfilledResult<unknown>).value as { ok?: boolean }).ok
+    );
 
-    if (!response.ok || !data.ok) {
-      res.status(400).json({
-        success: false,
-        message: `Lỗi Telegram: ${data.description || 'Không xác định'}`,
-      });
+    if (failures.length === targets.length) {
+      res.status(400).json({ success: false, message: 'Tất cả tin nhắn đều gửi thất bại' });
       return;
     }
 
-    res.json({ success: true, message: 'Tin nhắn test đã được gửi thành công!' });
+    const sent = targets.length - failures.length;
+    res.json({
+      success: true,
+      message: failures.length === 0
+        ? `Tin nhắn test đã được gửi thành công đến ${sent} người nhận!`
+        : `Đã gửi đến ${sent}/${targets.length} người nhận`
+    });
   } catch (error) {
     console.error('Telegram test error:', error);
     res.status(500).json({ success: false, message: 'Không thể gửi tin nhắn test' });
@@ -125,11 +174,10 @@ router.post('/test', async (req: AuthRequest, res: Response) => {
 });
 
 // GET - Lấy thông tin bot và danh sách người dùng đã Start bot
-// Query param: ?token=<bot_token> (nếu không có dùng token đã lưu)
 router.get('/subscribers', async (req: AuthRequest, res: Response) => {
   try {
     const token = (req.query.token as string) || process.env.TELEGRAM_BOT_TOKEN;
-    const savedChatId = process.env.TELEGRAM_CHAT_ID;
+    const savedChatIds = getChatIds();
 
     if (!token) {
       res.status(400).json({ success: false, message: 'Bot token bắt buộc' });
@@ -139,7 +187,6 @@ router.get('/subscribers', async (req: AuthRequest, res: Response) => {
     const fetch = (await import('node-fetch')).default;
     const apiUrl = `https://api.telegram.org/bot${token}`;
 
-    // 1. Lấy thông tin bot
     const botInfoRes = await fetch(`${apiUrl}/getMe`, { method: 'GET' });
     const botInfo = await botInfoRes.json() as any;
 
@@ -148,11 +195,9 @@ router.get('/subscribers', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // 2. Lấy danh sách updates để tìm người dùng đã start bot
     const updatesRes = await fetch(`${apiUrl}/getUpdates?limit=100&timeout=0`, { method: 'GET' });
     const updatesData = await updatesRes.json() as any;
 
-    // Map: chat_id -> thông tin người dùng
     const userMap = new Map<string, {
       id: number;
       first_name?: string;
@@ -197,10 +242,9 @@ router.get('/subscribers', async (req: AuthRequest, res: Response) => {
 
     const subscribers = Array.from(userMap.values()).map((u) => ({
       ...u,
-      isConfigured: String(u.id) === savedChatId || u.id === Number(savedChatId),
+      isConfigured: savedChatIds.includes(String(u.id)),
     }));
 
-    // Sắp xếp: người đang được cấu hình lên đầu, sau đó theo lastSeen
     subscribers.sort((a, b) => {
       if (a.isConfigured && !b.isConfigured) return -1;
       if (!a.isConfigured && b.isConfigured) return 1;

@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Clock,
   Hash,
+  X,
 } from 'lucide-react';
 
 interface BotInfo {
@@ -47,7 +48,8 @@ export default function TelegramManager() {
   const [savedConfig, setSavedConfig] = useState<{
     botToken: string;
     botTokenRaw: string;
-    chatId: string;
+    chatIds: string[];
+    chatIdsRaw: string;
     isConfigured: boolean;
   } | null>(null);
 
@@ -60,7 +62,7 @@ export default function TelegramManager() {
   const [activeTab, setActiveTab] = useState<'config' | 'subscribers'>('config');
 
   const [botTokenInput, setBotTokenInput] = useState('');
-  const [chatIdInput, setChatIdInput] = useState('');
+  const [chatIdsInput, setChatIdsInput] = useState<string[]>([]);
 
   const [botInfo, setBotInfo] = useState<BotInfo | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -79,7 +81,7 @@ export default function TelegramManager() {
       const data = response.data.data;
       setSavedConfig(data);
       setBotTokenInput(data.botTokenRaw || '');
-      setChatIdInput(data.chatId || '');
+      setChatIdsInput(Array.isArray(data.chatIds) ? data.chatIds : []);
     } catch (error: any) {
       toast({ type: 'error', title: 'Lỗi', description: 'Không thể tải cấu hình Telegram.' });
     } finally {
@@ -114,15 +116,15 @@ export default function TelegramManager() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!botTokenInput.trim() || !chatIdInput.trim()) {
-      toast({ type: 'error', title: 'Lỗi', description: 'Bot Token và Chat ID đều bắt buộc.' });
+    if (!botTokenInput.trim() || chatIdsInput.length === 0) {
+      toast({ type: 'error', title: 'Lỗi', description: 'Bot Token và ít nhất 1 Chat ID bắt buộc.' });
       return;
     }
     setIsSaving(true);
     try {
       await telegramApi.updateConfig({
         botToken: botTokenInput.trim(),
-        chatId: chatIdInput.trim(),
+        chatIds: chatIdsInput.join(','),
       });
       toast({ type: 'success', title: 'Thành công', description: 'Cấu hình Telegram đã được lưu!' });
       fetchConfig();
@@ -139,7 +141,7 @@ export default function TelegramManager() {
     try {
       await telegramApi.sendTest({
         botToken: botTokenInput.trim(),
-        chatId: chatIdInput.trim(),
+        chatIds: chatIdsInput.join(','),
       });
       toast({ type: 'success', title: 'Thành công', description: 'Tin nhắn test đã được gửi đến Telegram!' });
     } catch (error: any) {
@@ -150,14 +152,33 @@ export default function TelegramManager() {
     }
   };
 
+  const handleAddChatId = (id: string) => {
+    const trimmed = id.trim();
+    if (trimmed && !chatIdsInput.includes(trimmed)) {
+      setChatIdsInput(prev => [...prev, trimmed]);
+    }
+  };
+
+  const handleRemoveChatId = (id: string) => {
+    setChatIdsInput(prev => prev.filter(c => c !== id));
+  };
+
   const handleSelectSubscriber = (sub: Subscriber) => {
-    setChatIdInput(String(sub.id));
-    setActiveTab('config');
-    toast({
-      type: 'success',
-      title: 'Đã chọn',
-      description: `Chat ID: ${sub.id} — ${sub.first_name || sub.username || 'User'}`,
-    });
+    const id = String(sub.id);
+    if (!chatIdsInput.includes(id)) {
+      setChatIdsInput(prev => [...prev, id]);
+      toast({
+        type: 'success',
+        title: 'Đã thêm',
+        description: `Chat ID ${id} — ${sub.first_name || sub.username || 'User'} đã được thêm vào danh sách nhận thông báo.`,
+      });
+    } else {
+      toast({
+        type: 'info',
+        title: 'Đã có',
+        description: `Chat ID ${id} đã có trong danh sách.`,
+      });
+    }
   };
 
   const copyToClipboard = (text: string, label?: string) => {
@@ -220,8 +241,8 @@ export default function TelegramManager() {
           </p>
           <p className={`text-sm ${savedConfig?.isConfigured ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
             {savedConfig?.isConfigured
-              ? `Bot Token: ${savedConfig.botToken} • Chat ID: ${savedConfig.chatId}`
-              : 'Vui lòng nhập Bot Token và Chat ID để bắt đầu nhận thông báo'}
+              ? `Bot Token: ${savedConfig.botToken} • ${savedConfig.chatIds.length} Chat ID`
+              : 'Vui lòng nhập Bot Token và ít nhất 1 Chat ID để bắt đầu nhận thông báo'}
           </p>
         </div>
       </div>
@@ -283,12 +304,16 @@ export default function TelegramManager() {
                   </div>
                 </div>
                 <div className="bg-card rounded-lg border p-3">
-                  <p className="text-xs text-muted-foreground mb-1">Chat ID</p>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm font-mono flex-1">{savedConfig.chatId || '—'}</code>
-                    <button onClick={() => copyToClipboard(savedConfig.chatId || '', 'Chat ID')} className="p-1 hover:bg-accent rounded transition-colors flex-shrink-0" title="Copy chat ID">
-                      <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                    </button>
+                  <p className="text-xs text-muted-foreground mb-1">Chat ID ({savedConfig.chatIds.length})</p>
+                  <div className="space-y-1">
+                    {savedConfig.chatIds.map(id => (
+                      <div key={id} className="flex items-center gap-2">
+                        <code className="text-sm font-mono flex-1 truncate">{id}</code>
+                        <button onClick={() => copyToClipboard(id, 'Chat ID')} className="p-1 hover:bg-accent rounded transition-colors flex-shrink-0" title="Copy chat ID">
+                          <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -337,18 +362,53 @@ export default function TelegramManager() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="chatId">
-                Chat ID
-                <span className="text-muted-foreground font-normal ml-1">(chọn từ tab Người đã Start Bot)</span>
+              <Label>
+                Chat ID nhận thông báo
+                <span className="text-muted-foreground font-normal ml-1">(chọn từ tab Người đã Start Bot hoặc nhập thủ công)</span>
               </Label>
-              <Input
-                id="chatId"
-                value={chatIdInput}
-                onChange={(e) => setChatIdInput(e.target.value)}
-                placeholder="Ví dụ: -100123456789 hoặc 123456789"
-                className="font-mono text-sm"
-                disabled={isSaving}
-              />
+
+              {/* Selected Chat IDs tags */}
+              {chatIdsInput.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg border min-h-[44px]">
+                  {chatIdsInput.map(id => (
+                    <span key={id} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-mono">
+                      <Hash className="w-3 h-3" />
+                      {id}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveChatId(id)}
+                        className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Input
+                  id="chatId"
+                  value={chatIdsInput.join(', ')}
+                  onChange={() => {}}
+                  placeholder="Nhấn Thêm hoặc chọn từ tab Người đã Start Bot"
+                  className="font-mono text-sm"
+                  disabled
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const raw = prompt('Nhập Chat ID (có thể nhập nhiều, cách nhau bằng dấu phẩy):');
+                    if (raw) {
+                      raw.split(',').forEach(id => handleAddChatId(id));
+                    }
+                  }}
+                  disabled={isSaving}
+                >
+                  Thêm
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center gap-3 pt-2 border-t">
@@ -359,7 +419,7 @@ export default function TelegramManager() {
                 type="button"
                 variant="outline"
                 onClick={handleTest}
-                disabled={isSaving || isTesting || !botTokenInput.trim() || !chatIdInput.trim()}
+                disabled={isSaving || isTesting || !botTokenInput.trim() || chatIdsInput.length === 0}
               >
                 <Send className="w-4 h-4 mr-2" />
                 {isTesting ? 'Đang gửi...' : 'Gửi test'}
@@ -385,7 +445,7 @@ export default function TelegramManager() {
                 Nhập <strong>Bot Token</strong> vào ô trên → nhấn tab <strong>Người đã Start Bot</strong> để xem danh sách
               </li>
               <li>
-                Nhấn vào người dùng để tự động điền <strong>Chat ID</strong> → nhấn <strong>Lưu cấu hình</strong>
+                Nhấn vào người dùng để <strong>thêm vào danh sách</strong> nhận thông báo (có thể thêm nhiều người) → nhấn <strong>Lưu cấu hình</strong>
               </li>
               <li>Nhấn <strong>Gửi test</strong> để xác nhận kết nối hoạt động</li>
             </ol>

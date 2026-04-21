@@ -29,5 +29,4 @@ const PerspectiveSchema = new Schema({
 PerspectiveSchema.index({ isActive: 1, sortOrder: 1 });
 
 export const Perspective: Model<IPerspective> = mongoose.model<IPerspective>('Perspective', PerspectiveSchema);
-export type { IPerspective };
 export default Perspective;

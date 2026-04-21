@@ -29,6 +29,5 @@ const ContactSchema = new Schema({
 ContactSchema.index({ isActive: 1, sortOrder: 1 });
 
 export const Contact: Model<IContact> = mongoose.model<IContact>('Contact', ContactSchema);
-export type { IContact };
 export type { ContactType };
 export default Contact;

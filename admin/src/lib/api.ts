@@ -110,9 +110,9 @@ export const statsApi = {
 // Telegram API
 export const telegramApi = {
   getConfig: () => api.get('/api/admin/telegram'),
-  updateConfig: (data: { botToken: string; chatId: string }) =>
+  updateConfig: (data: { botToken: string; chatIds: string }) =>
     api.put('/api/admin/telegram', data),
-  sendTest: (data?: { botToken?: string; chatId?: string }) =>
+  sendTest: (data?: { botToken?: string; chatIds?: string }) =>
     api.post('/api/admin/telegram/test', data || {}),
   getSubscribers: (token?: string) =>
     api.get('/api/admin/telegram/subscribers' + (token ? `?token=${encodeURIComponent(token)}` : '')),

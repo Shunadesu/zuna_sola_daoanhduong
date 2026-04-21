@@ -31,6 +31,5 @@ const QuoteSchema = new Schema({
 QuoteSchema.index({ status: 1, createdAt: -1 });
 
 export const Quote: Model<IQuote> = mongoose.model<IQuote>('Quote', QuoteSchema);
-export type { IQuote };
 export type { QuoteStatus };
 export default Quote;
