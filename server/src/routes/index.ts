@@ -7,5 +7,6 @@ export { default as trackRoutes } from './track.routes.js';
 export { default as overviewRoutes } from './overview.routes.js';
 export { default as amenityRoutes } from './amenity.routes.js';
 export { default as galleryRoutes } from './gallery.routes.js';
+export { default as sellerRoutes } from './seller.routes.js';
 export { default as perspectiveRoutes } from './perspective.routes.js';
-export { bannerAdminRoutes, contactAdminRoutes, quoteAdminRoutes, overviewAdminRoutes, amenityAdminRoutes, galleryAdminRoutes, perspectiveAdminRoutes, telegramAdminRoutes } from './admin/index.js';
+export { bannerAdminRoutes, contactAdminRoutes, quoteAdminRoutes, overviewAdminRoutes, amenityAdminRoutes, galleryAdminRoutes, perspectiveAdminRoutes, telegramAdminRoutes, sellerSettingsAdminRoutes } from './admin/index.js';

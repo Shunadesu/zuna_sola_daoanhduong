@@ -13,6 +13,10 @@ export const bannerApi = {
   getActive: () => api.get('/api/banners'),
 };
 
+export const sellerApi = {
+  get: () => api.get('/api/seller'),
+};
+
 export const overviewApi = {
   getActive: () => api.get('/api/overviews'),
 };

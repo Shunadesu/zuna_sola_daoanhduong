@@ -118,6 +118,12 @@ export const telegramApi = {
     api.get('/api/admin/telegram/subscribers' + (token ? `?token=${encodeURIComponent(token)}` : '')),
 };
 
+// Seller Settings API
+export const sellerApi = {
+  get: () => api.get('/api/admin/seller-settings'),
+  update: (data: SellerSettingsData) => api.put('/api/admin/seller-settings', data),
+};
+
 // Types
 export interface BannerFormData {
   title: string;
@@ -143,6 +149,15 @@ export interface ContactFormData {
   icon?: string;
   isActive?: boolean;
   sortOrder?: number;
+}
+
+export interface SellerSettingsData {
+  name?: string;
+  title?: string;
+  phone?: string;
+  zalo?: string;
+  avatar?: string;
+  description?: string;
 }
 
 export default api;

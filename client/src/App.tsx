@@ -4,18 +4,17 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { Header, Footer, SmoothScroll } from '@/components/layout';
 import { FloatingContactBar } from '@/components/public';
-import { HeroSection, OverviewSection, AmenitiesSection, GallerySection, ContactSection } from '@/components/sections';
+import { HeroSection, OverviewSection, AmenitiesSection, GallerySection, ContactSection, SellerSection, PerspectiveSection } from '@/components/sections';
 import { trackApi } from '@/lib/api';
 import { OverviewSection2 } from './components/sections/OverviewSection2';
 
 const SITE_CONFIG = {
-  name: 'Sola Đảo Ảnh Dương',
-  description: 'Dự án căn hộ cao cấp tại Đảo Ảnh Dương, Quận 2, TP. Hồ Chí Minh. Vị trí đắc địa, tiện ích đẳng cấp.',
-  url: 'https://sola.vn',
-  phone: '0909 123 456',
-  email: 'info@sola.vn',
-  address: 'Công ty cố phần đầu từ Địa Ốc Việt Nam Property Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi, Quận 2, TP. Hồ Chí Minh',
+  name: 'Biệt Thự Sola Đảo Ảnh Dương',
+  shortName: 'Sola Global City',
+  description: 'Dự án biệt thự cao cấp, shophouse tại vị trí đắc địa Quận 2, TP. Hồ Chí Minh. Giá biệt thự từ 8.5 tỷ, shophouse từ 5.2 tỷ.',
+  url: 'https://soladaoanhduong.nthanhproperty.fun',
   ogImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80',
+  keywords: 'biệt thự sola đảo ảnh dương, biệt thự sola global city, sola dao anh duong, biệt thự quận 2, shophouse quận 2, bất động sản quận 2',
 };
 
 function PageTracker() {
@@ -26,50 +25,42 @@ function PageTracker() {
   return null;
 }
 
+function SellerPersonSchema() {
+  const location = useLocation();
+  useEffect(() => {
+    // Schema is handled in index.html
+  }, [location]);
+  return null;
+}
+
 function Home() {
   return (
     <>
       <Helmet>
-        <title>{SITE_CONFIG.name} | Căn Hộ Cao Cấp Quận 2</title>
+        <title>Biệt Thự Sola Đảo Ảnh Dương | Biệt Thự Sola Global City Quận 2 Giá Tốt</title>
         <meta name="description" content={SITE_CONFIG.description} />
-        <meta name="keywords" content="căn hộ cao cấp, đảo ảnh dương, Quận 2, bất động sản, hồ chí minh" />
-        <meta property="og:title" content={`${SITE_CONFIG.name} | Căn Hộ Cao Cấp`} />
+        <meta name="keywords" content={SITE_CONFIG.keywords} />
+        <meta property="og:title" content="Biệt Thự Sola Đảo Ảnh Dương | Biệt Thự Sola Global City Quận 2" />
         <meta property="og:description" content={SITE_CONFIG.description} />
         <meta property="og:image" content={SITE_CONFIG.ogImage} />
         <meta property="og:url" content={SITE_CONFIG.url} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={SITE_CONFIG.name} />
+        <meta name="twitter:title" content="Biệt Thự Sola Đảo Ảnh Dương | Sola Global City Quận 2" />
         <meta name="twitter:description" content={SITE_CONFIG.description} />
         <meta name="twitter:image" content={SITE_CONFIG.ogImage} />
         <link rel="canonical" href={SITE_CONFIG.url} />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'RealEstateAgent',
-            name: SITE_CONFIG.name,
-            description: SITE_CONFIG.description,
-            url: SITE_CONFIG.url,
-            telephone: SITE_CONFIG.phone,
-            email: SITE_CONFIG.email,
-            address: {
-              '@type': 'PostalAddress',
-              streetAddress: 'Đường Đại Lộ Võ Văn Kiệt',
-              addressLocality: 'Quận 2',
-              addressRegion: 'TP. Hồ Chí Minh',
-              addressCountry: 'VN',
-            },
-          })}
-        </script>
       </Helmet>
 
+      <SellerPersonSchema />
+
       <HeroSection />
+      <SellerSection />
+      <PerspectiveSection />
       <OverviewSection />
       <GallerySection />
-
       <OverviewSection2 />
       <AmenitiesSection />
-
       <ContactSection />
     </>
   );

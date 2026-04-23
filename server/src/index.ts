@@ -22,7 +22,9 @@ import {
   galleryAdminRoutes,
   perspectiveRoutes,
   perspectiveAdminRoutes,
-  telegramAdminRoutes
+  telegramAdminRoutes,
+  sellerSettingsAdminRoutes,
+  sellerRoutes
 } from './routes/index.js';
 import uploadRoutes from './routes/upload.routes.js';
 
@@ -51,6 +53,7 @@ app.use('/api/overviews', overviewRoutes);
 app.use('/api/amenities', amenityRoutes);
 app.use('/api/galleries', galleryRoutes);
 app.use('/api/perspectives', perspectiveRoutes);
+app.use('/api/seller', sellerRoutes);
 
 // Track page views (from frontend client)
 app.use('/api/track', trackRoutes);
@@ -65,6 +68,7 @@ app.use('/api/admin/galleries', galleryAdminRoutes);
 app.use('/api/admin/perspectives', perspectiveAdminRoutes);
 app.use('/api/admin/stats', statsRoutes);
 app.use('/api/admin/telegram', telegramAdminRoutes);
+app.use('/api/admin/seller-settings', sellerSettingsAdminRoutes);
 
 // Upload Routes
 app.use('/api', uploadRoutes);

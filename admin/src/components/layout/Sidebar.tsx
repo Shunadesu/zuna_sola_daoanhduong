@@ -12,6 +12,7 @@ import {
   LogOut,
   X,
   MessageSquare,
+  UserCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -25,6 +26,7 @@ const menuItems = [
   { path: '/contacts', label: 'Liên hệ', icon: Phone },
   { path: '/quotes', label: 'Yêu cầu báo giá', icon: FileText },
   { path: '/telegram', label: 'Telegram', icon: MessageSquare },
+  { path: '/seller-settings', label: 'Thông tin Seller', icon: UserCircle },
 ];
 
 interface SidebarProps {

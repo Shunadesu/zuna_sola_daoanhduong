@@ -14,6 +14,7 @@ import PerspectiveManager from '@/pages/PerspectiveManager';
 import AmenityManager from '@/pages/AmenityManager';
 import GalleryManager from '@/pages/GalleryManager';
 import TelegramManager from '@/pages/TelegramManager';
+import SellerManager from '@/pages/SellerManager';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -50,6 +51,7 @@ function App() {
             <Route path="/amenities" element={<AmenityManager />} />
             <Route path="/galleries" element={<GalleryManager />} />
             <Route path="/telegram" element={<TelegramManager />} />
+            <Route path="/seller-settings" element={<SellerManager />} />
           </Route>
           
           <Route path="*" element={<Navigate to="/" replace />} />

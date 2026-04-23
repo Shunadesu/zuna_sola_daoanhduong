@@ -7,8 +7,9 @@ import { Overview } from './Overview.js';
 import { Amenity } from './Amenity.js';
 import { Gallery } from './Gallery.js';
 import { Perspective } from './Perspective.js';
+import { SellerSettings } from './SellerSettings.js';
 
-export { Admin, Banner, Quote, Contact, Visit, Overview, Amenity, Gallery, Perspective };
+export { Admin, Banner, Quote, Contact, Visit, Overview, Amenity, Gallery, Perspective, SellerSettings };
 export type { IAdmin } from './Admin.js';
 export type { IBanner } from './Banner.js';
 export type { IQuote } from './Quote.js';

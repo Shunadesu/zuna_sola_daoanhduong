@@ -6,3 +6,4 @@ export { AmenitiesSection } from './AmenitiesSection';
 export { GallerySection } from './GallerySection';
 export { PerspectiveSection } from './PerspectiveSection';
 export { ContactSection } from './ContactSection';
+export { SellerSection } from './SellerSection';

@@ -6,3 +6,4 @@ export { amenityAdminRoutes } from './amenity.admin.routes.js';
 export { galleryAdminRoutes } from './gallery.admin.routes.js';
 export { perspectiveAdminRoutes } from './perspective.admin.routes.js';
 export { telegramAdminRoutes } from './telegram.admin.routes.js';
+export { sellerSettingsAdminRoutes } from './seller-settings.admin.routes.js';

@@ -3,7 +3,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion, AnimatePresence } from 'framer-motion';
 import { bannerApi } from '@/lib/api';
-import { PerspectiveSection } from './PerspectiveSection';
 import type { Banner } from '@/lib/api';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -141,21 +140,23 @@ export function HeroSection() {
                           Sola Đảo Ánh Dương
                         </motion.span>
                         <motion.h1
+                          itemProp="name"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
                           className="text-4xl md:text-5xl lg:text-6xl font-bold text-shimmer-gold mb-4 leading-tight text-balance"
                         >
-                          {banner.title}
+                          Biệt Thự Sola Đảo Ảnh Dương - Sola Global City
                         </motion.h1>
-                        <motion.p
+                        <motion.h2
+                          itemProp="description"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 }}
                           className="text-lg md:text-xl italic text-white/90 mb-10"
                         >
-                          {banner.subtitle}
-                        </motion.p>
+                          Dự án biệt thự cao cấp Quận 2 · Giá từ 8.5 tỷ · Hotline: 0909 123 456
+                        </motion.h2>
                         {/* <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -203,9 +204,6 @@ export function HeroSection() {
         </div>
       </motion.div>
     </section>
-
-    {/* Phối cảnh nằm dưới Hero */}
-    <PerspectiveSection />
     </>
   );
 }
