@@ -90,6 +90,21 @@ export function HeroSection() {
   return (
     <>
       <section id="home" className="relative h-screen overflow-hidden">
+        {/* Video Background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src="/TVC Branding 2 phut_master.mov" type="video/quicktime" />
+          <source src="/TVC Branding 2 phut_master.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-black/50 z-[1]" />
+
       <Swiper
         ref={swiperRef}
         modules={[Autoplay, Pagination, Navigation]}
@@ -104,7 +119,7 @@ export function HeroSection() {
           nextEl: '.hero-next',
         }}
         onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-        className="h-full"
+        className="h-full z-[2]"
       >
         {currentBanners.map((banner, index) => (
           <SwiperSlide key={banner._id}>
