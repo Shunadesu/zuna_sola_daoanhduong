@@ -8,9 +8,6 @@ import { ImageInput } from '@/components/ui/ImageInput';
 import {
   UserCircle,
   Save,
-  Phone,
-  MessageCircle,
-  ShieldCheck,
   Loader2,
 } from 'lucide-react';
 
