@@ -154,7 +154,7 @@ export function HeroSection() {
                           transition={{ delay: 0.4 }}
                           className="text-lg md:text-xl italic text-white/90 mb-10"
                         >
-                          Dự án biệt thự cao cấp Quận 2 · Giá từ 8.5 tỷ · Hotline: 0909 123 456
+                          Dự án biệt thự cao cấp Quận 2 · Hotline: 0909 123 456
                         </motion.h2>
                         {/* <motion.div
                           initial={{ opacity: 0, y: 20 }}
