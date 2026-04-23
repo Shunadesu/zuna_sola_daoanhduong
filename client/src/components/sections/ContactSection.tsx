@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +8,6 @@ import { Input } from '@/components/ui';
 import { Label } from '@/components/ui';
 import { useQuoteStore } from '@/store';
 import toast from 'react-hot-toast';
-import api from '@/lib/api';
 
 const quoteSchema = z.object({
   fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
@@ -20,12 +18,13 @@ const quoteSchema = z.object({
 
 type QuoteFormData = z.infer<typeof quoteSchema>;
 
-const HOTLINE = '0845228379';
+const PROJECT_NAME = 'Biệt Thự Sola Đảo Ảnh Dương';
+const PHONE = '0909 123 456';
+const PHONE_RAW = '0909123456';
 const EMAIL = 'thanhpham.02092002@gmail.com';
 
 export function ContactSection() {
   const { isSubmitting, isSubmitted, submitQuote, reset } = useQuoteStore();
-  const [bannerImage, setBannerImage] = useState<string>('');
 
   const {
     register,
@@ -35,23 +34,6 @@ export function ContactSection() {
   } = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
   });
-
-  useEffect(() => {
-    const fetchBanner = async () => {
-      try {
-        const res = await api.get('/api/banners');
-        const banners = res.data.data;
-        const contactBanner = banners.find(
-          (b: any) => b.type === 'contact' || b.location === 'contact'
-        );
-        const fallback = banners[0];
-        setBannerImage(contactBanner?.imageUrl || fallback?.imageUrl || '');
-      } catch (err) {
-        console.error('Failed to fetch banner:', err);
-      }
-    };
-    fetchBanner();
-  }, []);
 
   const onSubmit = async (data: QuoteFormData) => {
     const success = await submitQuote(data);
@@ -64,20 +46,9 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        {bannerImage ? (
-          <img
-            src={bannerImage}
-            alt="Contact background"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/80" />
-      </div>
+    <section id="contact" className="relative min-h-screen flex items-center overflow-hidden bg-gray-50">
+      {/* Background */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-white via-gray-50 to-amber-50/20" />
 
       <div className="container mx-auto px-4 relative z-10 h-full flex items-center py-16">
         <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center w-full">
@@ -88,20 +59,20 @@ export function ContactSection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-4">
+            <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
               Liên hệ
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
               Đăng Ký Nhận Báo Giá
             </h2>
-            <p className="text-lg text-white/80 mb-10">
-              Điền thông tin để nhận tư vấn và báo giá chi tiết về dự án Sola Đảo Ảnh Dương
+            <p className="text-lg text-gray-600 mb-10">
+              Điền thông tin để nhận tư vấn và báo giá chi tiết về dự án {PROJECT_NAME}
             </p>
 
             <div className="space-y-4">
               <motion.a
-                href={`tel:${HOTLINE}`}
-                className="flex items-center gap-4 p-5 bg-white/10 backdrop-blur-md rounded-2xl hover:bg-white/20 transition-all group"
+                href={`tel:${PHONE_RAW}`}
+                className="flex items-center gap-4 p-5 bg-white rounded-2xl hover:bg-gray-50 transition-all group shadow-sm border border-gray-100"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -109,14 +80,14 @@ export function ContactSection() {
                   <Phone className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80 mb-1">Hotline</p>
-                  <p className="text-xl font-bold text-white">{HOTLINE}</p>
+                  <p className="text-sm text-gray-500 mb-1">Hotline</p>
+                  <p className="text-xl font-bold text-gray-900">{PHONE}</p>
                 </div>
               </motion.a>
 
               <motion.a
                 href={`mailto:${EMAIL}`}
-                className="flex items-center gap-4 p-5 bg-white/10 backdrop-blur-md rounded-2xl hover:bg-white/20 transition-all group"
+                className="flex items-center gap-4 p-5 bg-white rounded-2xl hover:bg-gray-50 transition-all group shadow-sm border border-gray-100"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -124,8 +95,8 @@ export function ContactSection() {
                   <Mail className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80 mb-1">Email</p>
-                  <p className="text-lg font-semibold text-white break-all">{EMAIL}</p>
+                  <p className="text-sm text-gray-500 mb-1">Email</p>
+                  <p className="text-lg font-semibold text-gray-900 break-all">{EMAIL}</p>
                 </div>
               </motion.a>
             </div>
@@ -138,67 +109,67 @@ export function ContactSection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="bg-white/10 backdrop-blur-xl p-8 md:p-12 rounded-3xl border border-white/20 shadow-2xl">
+            <div className="bg-white p-8 md:p-12 rounded-3xl border border-gray-100 shadow-lg">
               {isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-8"
                 >
-                  <div className="w-20 h-20 bg-green-500/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle className="w-10 h-10 text-green-400" />
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="w-10 h-10 text-green-600" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-4">Gửi Thành Công!</h3>
-                  <p className="text-white/80 mb-8 max-w-sm mx-auto">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Gửi Thành Công!</h3>
+                  <p className="text-gray-600 mb-8 max-w-sm mx-auto">
                     Cảm ơn bạn đã quan tâm đến dự án. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.
                   </p>
-                  <Button onClick={reset} variant="outline" className="border-white/30 text-black hover:bg-white/10">
+                  <Button onClick={reset} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                     Gửi yêu cầu khác
                   </Button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div>
-                    <Label htmlFor="fullName" className="text-white/90">Họ và tên *</Label>
+                    <Label htmlFor="fullName" className="text-gray-700 font-medium">Họ và tên *</Label>
                     <Input
                       id="fullName"
                       placeholder="Nhập họ và tên"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary/20"
                       error={errors.fullName?.message}
                       {...register('fullName')}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="phone" className="text-white/90">Số điện thoại *</Label>
+                    <Label htmlFor="phone" className="text-gray-700 font-medium">Số điện thoại *</Label>
                     <Input
                       id="phone"
                       type="tel"
                       placeholder="Nhập số điện thoại"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary/20"
                       error={errors.phone?.message}
                       {...register('phone')}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-white/90">Email (tuỳ chọn)</Label>
+                    <Label htmlFor="email" className="text-gray-700 font-medium">Email (tuỳ chọn)</Label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="Nhập email của bạn"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary/20"
                       error={errors.email?.message}
                       {...register('email')}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="apartment" className="text-white/90">Căn hộ quan tâm</Label>
+                    <Label htmlFor="apartment" className="text-gray-700 font-medium">Căn hộ quan tâm</Label>
                     <select
                       id="apartment"
                       {...register('apartment')}
-                      className="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary/20 outline-none transition-all"
                     >
                       <option value="">-- Chọn loại căn hộ --</option>
                       <option value="biệt thự song lập">Biệt thự song lập</option>
@@ -217,7 +188,7 @@ export function ContactSection() {
                     Gửi Yêu Cầu
                   </Button>
 
-                  <p className="text-xs text-center text-white/70">
+                  <p className="text-xs text-center text-gray-500">
                     Bằng việc gửi yêu cầu, bạn đồng ý với chính sách bảo mật của chúng tôi.
                   </p>
                 </form>

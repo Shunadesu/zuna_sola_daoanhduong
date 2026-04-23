@@ -344,7 +344,7 @@ export function FloatingContactBar() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg"
+          className="w-14 h-14 rounded-full bg-gray-600 text-white flex items-center justify-center shadow-lg"
         >
           <motion.div
             animate={{ rotate: isExpanded ? 45 : 0 }}

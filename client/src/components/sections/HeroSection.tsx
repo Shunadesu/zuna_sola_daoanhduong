@@ -69,17 +69,16 @@ export function HeroSection() {
 
   if (isLoading) {
     return (
-      <section className="relative h-screen bg-gray-900 animate-pulse">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+      <section className="relative h-screen bg-gray-100 animate-pulse">
         <div className="absolute inset-0 flex items-center">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-block w-48 h-8 bg-white/10 rounded-full mb-6" />
-              <div className="w-80 md:w-96 h-16 bg-white/10 rounded-lg mx-auto mb-4" />
-              <div className="w-64 h-8 bg-white/10 rounded-lg mx-auto mb-10" />
+              <div className="inline-block w-48 h-8 bg-gray-200 rounded-full mb-6 mx-auto" />
+              <div className="w-80 md:w-96 h-16 bg-gray-200 rounded-lg mx-auto mb-4" />
+              <div className="w-64 h-8 bg-gray-200 rounded-lg mx-auto mb-10" />
               <div className="flex justify-center gap-4">
-                <div className="w-36 h-12 bg-white/10 rounded-full" />
-                <div className="w-36 h-12 bg-white/10 rounded-full" />
+                <div className="w-36 h-12 bg-gray-200 rounded-full" />
+                <div className="w-36 h-12 bg-gray-200 rounded-full" />
               </div>
             </div>
           </div>

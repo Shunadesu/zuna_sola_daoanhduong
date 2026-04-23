@@ -70,15 +70,15 @@ export function SellerSection() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 max-w-5xl mx-auto">
             <div className="lg:col-span-7 space-y-4 animate-pulse">
-              <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="h-4 w-5/6 bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="h-4 w-4/6 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="h-8 w-64 bg-slate-200 rounded" />
+              <div className="h-4 w-full bg-slate-200 rounded" />
+              <div className="h-4 w-5/6 bg-slate-200 rounded" />
+              <div className="h-4 w-4/6 bg-slate-200 rounded" />
             </div>
             <div className="lg:col-span-3 space-y-4 animate-pulse">
-              <div className="w-full aspect-[9/12] rounded-2xl bg-slate-200 dark:bg-slate-700 overflow-hidden" />
-              <div className="h-6 w-40 bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="h-4 w-56 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="w-full aspect-[9/12] rounded-2xl bg-slate-200 overflow-hidden" />
+              <div className="h-6 w-40 bg-slate-200 rounded" />
+              <div className="h-4 w-56 bg-slate-200 rounded" />
             </div>
           </div>
         </div>
@@ -129,16 +129,16 @@ export function SellerSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.5 }}
-            className="max-w-5xl mx-auto"
+            className="max-w-7xl mx-auto"
           >
             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 lg:gap-8 items-start">
 
               {/* === LEFT: Giới thiệu dài (7/10) === */}
               <div className="lg:col-span-7">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 lg:p-8 shadow-lg">
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 lg:p-8 shadow-lg">
                   {/* Header */}
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-foreground mb-2">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
                       Giới thiệu về {seller.name || 'Biệt Thự Sola Đảo Ảnh Dương'}
                     </h2>
                     <div className="w-16 h-1 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full" />
@@ -146,15 +146,15 @@ export function SellerSection() {
 
                   {/* Stats badges */}
                   <div className="flex flex-wrap gap-3 mb-8">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-semibold shadow-sm">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold shadow-sm">
                       <Star className="w-3.5 h-3.5 fill-current" />
                       Chuyên viên hàng đầu
                     </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 rounded-lg text-xs font-semibold shadow-sm">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold shadow-sm">
                       <Award className="w-3.5 h-3.5" />
                       +5 năm kinh nghiệm
                     </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-semibold shadow-sm">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold shadow-sm">
                       <Clock className="w-3.5 h-3.5" />
                       Hỗ trợ 24/7
                     </div>
@@ -174,9 +174,9 @@ export function SellerSection() {
 
               {/* === RIGHT: Seller Card (3/10) === */}
               <div className="lg:col-span-3">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
                   {/* Avatar */}
-                  <div className="w-full aspect-[9/12] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden relative">
+                  <div className="w-full aspect-[9/12] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden relative">
                     {seller.avatar ? (
                       <img
                         src={seller.avatar}
@@ -185,7 +185,7 @@ export function SellerSection() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-6xl font-bold text-slate-300 dark:text-slate-600">
+                        <span className="text-6xl font-bold text-slate-300">
                           {seller.name ? seller.name.charAt(0).toUpperCase() : '?'}
                         </span>
                       </div>
@@ -194,23 +194,15 @@ export function SellerSection() {
 
                   {/* Info */}
                   <div className="p-5">
-                    <h3 className="text-xl font-bold text-foreground mb-0.5">
+                    <h3 className="text-xl font-bold text-gray-900 mb-0.5">
                       {seller.name || 'Chưa có tên'}
                     </h3>
                     {seller.title && (
-                      <p className="text-sm text-muted-foreground mb-4">{seller.title}</p>
+                      <p className="text-sm text-gray-500 mb-4">{seller.title}</p>
                     )}
 
                     {/* Description from Quill */}
                     {seller.description && renderQuillContent(seller.description)}
-
-                    {/* SEO-optimized phone section */}
-                    {seller.phone && (
-                      <div itemScope itemType="https://schema.org/LocalBusiness" className="hidden">
-                        <meta itemProp="name" content={seller.name || 'Biệt Thự Sola Đảo Ảnh Dương'} />
-                        <meta itemProp="telephone" content={seller.phone} />
-                      </div>
-                    )}
 
                     {/* Buttons */}
                     <div className="flex flex-col gap-2.5 mt-4">

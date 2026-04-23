@@ -94,9 +94,28 @@ export default function SellerManager() {
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }],
       ['link'],
+      [{ size: ['11px', '12px', '14px', '16px', '18px', '20px', false] }],
       ['clean'],
     ],
   };
+
+  const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link',
+    'size',
+  ];
+
+  // Register custom font sizes for Quill
+  useEffect(() => {
+    const Quill = (window as any).Quill;
+    if (!Quill) return;
+
+    const SizeStyle = Quill.import('attributors/style/size');
+    SizeStyle.whitelist = ['11px', '12px', '14px', '16px', '18px', '20px'];
+    Quill.register(SizeStyle, true);
+  }, []);
 
   if (isLoading) {
     return (
@@ -191,6 +210,7 @@ export default function SellerManager() {
               value={formData.description}
               onChange={(value: string) => setFormData((prev) => ({ ...prev, description: value }))}
               modules={quillModules}
+              formats={quillFormats}
               theme="snow"
               placeholder="Mô tả ngắn về seller (hiển thị bên dưới tên trong card)"
             />
@@ -204,6 +224,7 @@ export default function SellerManager() {
               value={formData.intro}
               onChange={(value: string) => setFormData((prev) => ({ ...prev, intro: value }))}
               modules={quillModules}
+              formats={quillFormats}
               theme="snow"
               placeholder="Bài viết giới thiệu dài về seller, kinh nghiệm, thành tựu..."
             />
