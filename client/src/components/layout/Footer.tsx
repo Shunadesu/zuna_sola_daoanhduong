@@ -39,8 +39,8 @@ export function Footer() {
             <meta itemProp="description" content="Dự án biệt thự cao cấp, shophouse tại vị trí đắc địa Quận 2, TP. Hồ Chí Minh." />
 
             <p className="text-gray-600 max-w-md leading-relaxed">
-              {PROJECT_NAME} ({SHORT_NAME}) - Dự án biệt thự cao cấp, shophouse tại vị trí đắc địa bậc nhất 
-              Quận 2, TP. Hồ Chí Minh. Giá biệt thự từ 8.5 tỷ, shophouse từ 5.2 tỷ.
+              {PROJECT_NAME} ({SHORT_NAME}) - Dự án biệt thự cao cấp, SOLA VILLAS THE GLOBAL CITY BIỂU TƯỢNG VILLA COMPOUND DUY NHẤT TẠI GLOBAL CITY Phân khu Sola - Đảo Ánh Dương nằm trong khu đô thị The Global City
+              Quận 2, TP. Hồ Chí Minh.
             </p>
 
             {/* Social */}
