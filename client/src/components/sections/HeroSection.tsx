@@ -145,7 +145,7 @@ export function HeroSection() {
                           transition={{ delay: 0.3 }}
                           className="text-4xl md:text-5xl lg:text-6xl font-bold text-shimmer-gold mb-4 leading-tight text-balance"
                         >
-                          Biệt Thự Sola Đảo Ảnh Dương - Sola Global City
+                          Biệt Thự Sola Đảo Ánh Dương - Sola The Global City
                         </motion.h1>
                         <motion.h2
                           itemProp="description"
