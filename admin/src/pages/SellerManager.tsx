@@ -187,7 +187,7 @@ export default function SellerManager() {
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-              placeholder="Ví dụ: 0909 123 456"
+              placeholder="Ví dụ: 0845 228 379"
               disabled={isSaving}
             />
           </div>

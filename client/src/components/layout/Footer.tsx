@@ -3,7 +3,7 @@ import { Phone, Mail, MapPin, Facebook, MessageCircle, Building2 } from 'lucide-
 const PROJECT_NAME = 'Biệt Thự Sola Đảo Ảnh Dương';
 const SHORT_NAME = 'Sola Global City';
 const ADDRESS = 'Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi, Quận 2, TP. Hồ Chí Minh';
-const PHONE = '0909 123 456';
+const PHONE = '0845 228 379';
 const PHONE_RAW = '0909123456';
 const EMAIL = 'thanhpham.02092002@gmail.com';
 const MAP_IMAGE = 'https://masterisevietnam.com/wp-content/uploads/2025/08/vi-tri-sola-global-city.jpg';
