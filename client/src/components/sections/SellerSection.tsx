@@ -28,7 +28,7 @@ function renderQuillContent(html: string) {
   if (!html) return null;
   return (
     <div
-      className="[&_p]:text-muted-foreground [&_p]:leading-relaxed [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_a]:text-primary [&_a]:underline [&_strong]:font-semibold [&_em]:italic"
+      className="[&_p]:text-black [&_p]:leading-relaxed [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_a]:text-primary [&_a]:underline [&_strong]:font-semibold [&_em]:italic"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -185,7 +185,7 @@ export function SellerSection() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-6xl font-bold text-slate-300">
+                        <span className="text-6xl font-bold text-black">
                           {seller.name ? seller.name.charAt(0).toUpperCase() : '?'}
                         </span>
                       </div>
