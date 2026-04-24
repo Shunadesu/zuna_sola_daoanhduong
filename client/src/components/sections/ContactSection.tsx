@@ -20,7 +20,7 @@ type QuoteFormData = z.infer<typeof quoteSchema>;
 
 const PROJECT_NAME = 'Biệt Thự Sola Đảo Ảnh Dương';
 const PHONE = '0845 228 379';
-const PHONE_RAW = '0909123456';
+const PHONE_RAW = '0845228379';
 const EMAIL = 'thanhpham.02092002@gmail.com';
 
 export function ContactSection() {

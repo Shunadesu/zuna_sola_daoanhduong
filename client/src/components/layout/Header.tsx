@@ -16,7 +16,7 @@ const navLinks = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('0909123456');
+  const [phoneNumber, setPhoneNumber] = useState('0845228379');
 
   useEffect(() => {
     const handleScroll = () => {

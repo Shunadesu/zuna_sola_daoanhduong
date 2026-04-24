@@ -106,7 +106,7 @@ export function LocationSection() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Hotline</h3>
-                    <a href="tel:0909123456" className="text-primary font-medium hover:underline">
+                    <a href="tel:0845228379" className="text-primary font-medium hover:underline">
                       0845 228 379
                     </a>
                   </div>

@@ -61,14 +61,14 @@ const seedSampleData = async () => {
       {
         type: 'phone',
         label: 'Hotline',
-        value: '0909123456',
+        value: '0845228379',
         isActive: true,
         sortOrder: 1
       },
       {
         type: 'zalo',
         label: 'Zalo',
-        value: '0909123456',
+        value: '0845228379',
         isActive: true,
         sortOrder: 2
       },

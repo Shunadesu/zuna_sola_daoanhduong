@@ -197,7 +197,7 @@ export default function SellerManager() {
               id="zalo"
               value={formData.zalo}
               onChange={(e) => setFormData((prev) => ({ ...prev, zalo: e.target.value }))}
-              placeholder="Ví dụ: 0909123456"
+              placeholder="Ví dụ: 0845228379"
               disabled={isSaving}
             />
           </div>

@@ -350,7 +350,7 @@ export default function ContactManager() {
                   ? '123 Đường ABC, Quận 1, TP.HCM'
                   : formData.type === 'facebook'
                   ? 'https://facebook.com/...'
-                  : '0909123456'
+                  : '0845228379'
               }
               required
               disabled={submitting}
