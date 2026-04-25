@@ -80,11 +80,12 @@
     <!-- Canonical -->
     <link rel="canonical" href="https://soladaoanhduong.nthanhproperty.fun" />
 
-    <!-- Fonts -->
+    <!-- Fonts - Optimized loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Prata&family=Inter:wght@400;500;600;700&display=swap" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Prata&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Prata&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -98,7 +99,7 @@
       Biệt Thự Sola Đảo Ảnh Dương | Biệt Thự Sola Global City Quận 2 Giá Tốt
     </title>
 
-    <!-- SCHEMA.ORG: RealEstateAgent + RealEstateListing -->
+    <!-- SCHEMA.ORG: RealEstateAgent -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -109,12 +110,11 @@
           "Biệt Thự Sola Global City",
           "SOLA Đảo Ảnh Dương"
         ],
-        "description": "Dự án biệt thự cao cấp, SOLA VILLAS THE GLOBAL CITY BIỂU TƯỢNG VILLA COMPOUND DUY NHẤT TẠI GLOBAL CITY Phân khu Sola - Đảo Ánh Dương nằm trong khu đô thị The Global City",
+        "description": "Dự án biệt thự cao cấp, SOLA VILLAS THE GLOBAL CITY BIỂU TƯỢNG VILLA COMPOUND DUY NHẤT TẠI GLOBAL CITY Phân khu Sola - Đảo Ánh Dương nằm trong khu đô thị The Global City, Quận 2, TP. Hồ Chí Minh.",
         "url": "https://soladaoanhduong.nthanhproperty.fun",
-        "telephone": "+84-909-123-456",
+        "telephone": "+84-845-228-379",
         "email": "thanhpham.02092002@gmail.com",
         "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
-        "logo": "https://soladaoanhduong.nthanhproperty.fun/SOLA-dao-anh-duong-scaled.png",
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi",
@@ -131,13 +131,7 @@
         "openingHoursSpecification": [
           {
             "@type": "OpeningHoursSpecification",
-            "dayOfWeek": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday"
-            ],
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
             "opens": "08:00",
             "closes": "18:00"
           },
@@ -148,32 +142,153 @@
             "closes": "17:00"
           }
         ],
-        "sameAs": ["https://www.facebook.com/solaglobalcity"]
+        "sameAs": [
+          "https://www.facebook.com/solaglobalcity",
+          "https://zalo.me/0845228379"
+        ],
+        "areaServed": {
+          "@type": "City",
+          "name": "Thành phố Hồ Chí Minh"
+        },
+        "priceRange": "₫5.2B - ₫15B"
       }
     </script>
 
-    <!-- SCHEMA.ORG: Product (Biệt Thự Sola Đảo Ảnh Dương) -->
+    <!-- SCHEMA.ORG: Organization (For Local SEO) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Product",
+        "@type": "Organization",
+        "@id": "https://soladaoanhduong.nthanhproperty.fun/#organization",
+        "name": "Sola Global City - Biệt Thự Sola Đảo Ảnh Dương",
+        "url": "https://soladaoanhduong.nthanhproperty.fun",
+        "logo": "https://soladaoanhduong.nthanhproperty.fun/SOLA-dao-anh-duong-scaled.png",
+        "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
+        "description": "Dự án biệt thự cao cấp Sola Global City tại Quận 2, TP. Hồ Chí Minh. Chủ đầu tư Masterise Vietnam.",
+        "telephone": "+84-845-228-379",
+        "email": "thanhpham.02092002@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi",
+          "addressLocality": "Quận 2",
+          "addressRegion": "TP. Hồ Chí Minh",
+          "postalCode": "70000",
+          "addressCountry": "VN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "10.72942",
+          "longitude": "106.69842"
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Saturday", "Sunday"],
+            "opens": "09:00",
+            "closes": "17:00"
+          }
+        ],
+        "sameAs": [
+          "https://www.facebook.com/solaglobalcity",
+          "https://zalo.me/0845228379"
+        ],
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+84-845-228-379",
+            "contactType": "sales",
+            "availableLanguage": ["Vietnamese", "English"],
+            "areaServed": "VN"
+          },
+          {
+            "@type": "ContactPoint",
+            "telephone": "+84-845-228-379",
+            "contactType": "customer service",
+            "availableLanguage": ["Vietnamese"],
+            "areaServed": "VN"
+          }
+        ]
+      }
+    </script>
+
+    <!-- SCHEMA.ORG: WebSite (For Local SEO Search Box) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Sola Global City - Biệt Thự Sola Đảo Ảnh Dương",
+        "url": "https://soladaoanhduong.nthanhproperty.fun",
+        "description": "Dự án biệt thự cao cấp Sola Global City tại Quận 2, TP. Hồ Chí Minh",
+        "publisher": {
+          "@id": "https://soladaoanhduong.nthanhproperty.fun/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://soladaoanhduong.nthanhproperty.fun/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <!-- SCHEMA.ORG: Residence (Thay thế Product - phù hợp hơn cho bất động sản) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Residence",
         "name": "Biệt Thự Sola Đảo Ảnh Dương - Sola Global City",
         "alternateName": [
           "Biệt Thự Sola Global City",
           "Sola Global City Quận 2",
           "SOLA Đảo Ảnh Dương"
         ],
-        "description": "Dự án biệt thự cao cấp và shophouse tại vị trí đắc địa Quận 2, TP. Hồ Chí Minh. Quy mô 45 hecta, hơn 1,000 sản phẩm.",
+        "description": "Dự án biệt thự cao cấp và shophouse tại vị trí đắc địa Quận 2, TP. Hồ Chí Minh. Quy mô 45 hecta, hơn 1,000 sản phẩm biệt thự và shophouse. Chủ đầu tư Masterise Vietnam.",
         "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
         "url": "https://soladaoanhduong.nthanhproperty.fun",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi",
+          "addressLocality": "Quận 2",
+          "addressRegion": "TP. Hồ Chí Minh",
+          "postalCode": "70000",
+          "addressCountry": "VN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "10.72942",
+          "longitude": "106.69842"
+        },
+        "numberOfRooms": "4-6 phòng ngủ",
+        "numberOfBathrooms": "4-5 phòng tắm",
+        "numberOfBedrooms": "4-6 phòng ngủ",
+        "floorSize": {
+          "@type": "QuantitativeValue",
+          "value": "300-500",
+          "unitCode": "MTK",
+          "description": "Diện tích đất từ 300-500m2"
+        },
+        "amenityFeature": [
+          {"@type": "LocationFeatureSpecification", "name": "Hồ bơi", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Phòng gym", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Công viên", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Bảo vệ 24/7", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Camera an ninh", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Thang máy", "value": true}
+        ],
         "brand": {
           "@type": "Brand",
           "name": "Masterise Vietnam"
         },
-        "category": "Bất động sản - Biệt thự",
-        "manufacturer": {
-          "@type": "Organization",
-          "name": "Masterise Vietnam"
+        "category": "Bất động sản - Biệt thự cao cấp",
+        "containsPlace": {
+          "@type": "ApartmentComplex",
+          "name": "The Global City",
+          "numberOfUnits": "1000+"
         },
         "offers": {
           "@type": "AggregateOffer",
@@ -182,7 +297,8 @@
           "priceCurrency": "VND",
           "offerCount": "120",
           "availability": "https://schema.org/InStock",
-          "url": "https://soladaoanhduong.nthanhproperty.fun"
+          "url": "https://soladaoanhduong.nthanhproperty.fun",
+          "description": "Giá biệt thự từ 5.2 tỷ đến 15 tỷ VND"
         },
         "aggregateRating": {
           "@type": "AggregateRating",
@@ -193,7 +309,44 @@
       }
     </script>
 
-    <!-- SCHEMA.ORG: FAQPage -->
+    <!-- SCHEMA.ORG: Place (Cho vị trí dự án) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Place",
+        "name": "Biệt Thự Sola Đảo Ảnh Dương - Sola Global City",
+        "description": "Dự án biệt thự cao cấp tại Phường Thạnh Mỹ Lợi, Quận 2, TP. Hồ Chí Minh. Vị trí đắc địa ngay trung tâm đảo ảnh dương, kết nối giao thông thuận tiện.",
+        "url": "https://soladaoanhduong.nthanhproperty.fun",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Số 8 - 10 Tạ Hiện, Phường Thạnh Mỹ Lợi",
+          "addressLocality": "Quận 2",
+          "addressRegion": "TP. Hồ Chí Minh",
+          "postalCode": "70000",
+          "addressCountry": "VN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "10.72942",
+          "longitude": "106.69842"
+        },
+        "hasMap": "https://www.google.com/maps/place/Sola+Global+City",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "86",
+          "bestRating": "5"
+        },
+        "amenityFeature": [
+          {"@type": "LocationFeatureSpecification", "name": "Trường học quốc tế", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Bệnh viện quốc tế", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Trung tâm thương mại", "value": true},
+          {"@type": "LocationFeatureSpecification", "name": "Công viên", "value": true}
+        ]
+      }
+    </script>
+
+    <!-- SCHEMA.ORG: FAQPage (Mở rộng 10 câu hỏi) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -246,6 +399,38 @@
               "@type": "Answer",
               "text": "Biệt thự Sola Global City nằm ở vị trí chiến lược Quận 2 - khu vực có tốc độ tăng giá mạnh nhất TP.HCM. Theo thống kê, giá bất động sản Quận 2 tăng trung bình 20-30%/năm. Đây là cơ hội đầu tư sinh lời hấp dẫn."
             }
+          },
+          {
+            "@type": "Question",
+            "name": "Chủ đầu tư Sola Global City là ai?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sola Global City được phát triển bởi Masterise Vietnam - một trong những chủ đầu tư uy tín hàng đầu Việt Nam với nhiều dự án bất động sản cao cấp thành công."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Diện tích biệt thự Sola Global City là bao nhiêu?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Biệt thự Sola Global City có diện tích đất từ 300m2 đến 500m2, với 4-6 phòng ngủ và 4-5 phòng tắm. Thiết kế hiện đại, sang trọng, phù hợp cho gia đình đa thế hệ."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Sola Global City có gần trường học và bệnh viện không?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Có, Sola Global City nằm trong khu vực có hệ thống trường học quốc tế và bệnh viện quốc tế, thuận tiện cho con em học tập và khám chữa bệnh. Các tiện ích y tế và giáo dục đều trong bán kính 5-10 phút di chuyển."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Thanh toán Sola Global City như thế nào?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sola Global City hỗ trợ nhiều hình thức thanh toán linh hoạt: thanh toán trước 30% và phần còn lại theo tiến độ xây dựng. Liên hệ hotline 0845 228 379 để được tư vấn chi tiết về phương án thanh toán phù hợp."
+            }
           }
         ]
       }
@@ -276,6 +461,64 @@
             "item": "https://soladaoanhduong.nthanhproperty.fun"
           }
         ]
+      }
+    </script>
+
+    <!-- SCHEMA.ORG: ImageObject (For Google Image Search) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "name": "Biệt Thự Sola Đảo Ảnh Dương - Sola Global City",
+        "description": "Hình ảnh dự án biệt thự cao cấp Sola Global City tại Quận 2, TP. Hồ Chí Minh. Chủ đầu tư Masterise Vietnam.",
+        "url": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
+        "width": "1200",
+        "height": "630",
+        "contentUrl": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
+        "license": "https://unsplash.com/license",
+        "author": {
+          "@type": "Organization",
+          "name": "Masterise Vietnam"
+        },
+        "datePublished": "2026-04-25",
+        "keywords": "biệt thự sola đảo ảnh dương, biệt thự quận 2, bất động sản cao cấp, the global city"
+      }
+    </script>
+
+    <!-- SCHEMA.ORG: CollectionPage for Image Gallery -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Hình Ảnh Dự Án Sola Global City",
+        "description": "Bộ sưu tập hình ảnh dự án biệt thự cao cấp Sola Global City tại Quận 2, TP. Hồ Chí Minh",
+        "url": "https://soladaoanhduong.nthanhproperty.fun/#gallery",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
+          "width": "1200",
+          "height": "630"
+        },
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": [
+            {
+              "@type": "ImageObject",
+              "name": "Biệt thự song lập Sola Global City",
+              "description": "Hình ảnh biệt thự song lập tại dự án Sola Global City Quận 2"
+            },
+            {
+              "@type": "ImageObject",
+              "name": "Biệt thự đơn lập Sola Global City",
+              "description": "Hình ảnh biệt thự đơn lập tại dự án Sola Global City Quận 2"
+            },
+            {
+              "@type": "ImageObject",
+              "name": "Nhà phố liền kề Sola Global City",
+              "description": "Hình ảnh nhà phố liền kề tại dự án Sola Global City Quận 2"
+            }
+          ]
+        }
       }
     </script>
   </head>

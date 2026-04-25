@@ -167,9 +167,11 @@ export function GallerySection() {
             >
               <img
                 src={filteredImages[0].imageUrl}
-                alt={filteredImages[0].title}
+                alt={`Hình ảnh ${filteredImages[0].title || 'biệt thự'} - ${activeCategory} Sola Global City Quận 2 - Dự án biệt thự cao cấp`}
                 className="w-full aspect-[16/9] object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
+                width="1200"
+                height="675"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3 shadow-lg">
@@ -200,20 +202,22 @@ export function GallerySection() {
                 ];
                 const spanClass = spanPatterns[idx % spanPatterns.length];
                 return (
-                  <motion.div
-                    key={image._id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.04 }}
-                    className={`relative overflow-hidden rounded-xl cursor-pointer w-full h-full group ${spanClass}`}
-                    onClick={() => openLightbox(image, idx)}
-                  >
-                    <img
-                      src={image.imageUrl}
-                      alt={image.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                <motion.div
+                  key={image._id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.04 }}
+                  className={`relative overflow-hidden rounded-xl cursor-pointer w-full h-full group ${spanClass}`}
+                  onClick={() => openLightbox(image, idx)}
+                >
+                  <img
+                    src={image.imageUrl}
+                    alt={`Hình ảnh ${image.title || 'biệt thự'} - ${activeCategory} Sola Global City Quận 2 - Dự án biệt thự cao cấp`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                  />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3 shadow-lg">
                         <ZoomIn className="w-5 h-5 text-gray-800" />
@@ -289,7 +293,7 @@ export function GallerySection() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
                 src={lightbox.image.imageUrl}
-                alt={lightbox.image.title}
+                alt={`Hình ảnh ${lightbox.image.title || 'biệt thự'} - ${currentCat.label} Sola Global City Quận 2`}
                 className="max-w-full max-h-[75vh] object-contain rounded-lg"
                 onClick={(e) => e.stopPropagation()}
               />

@@ -61,8 +61,11 @@ export function OverviewSection() {
           >
             <img
               src={item.imageUrl}
-              alt={item.title || `Overview ${index + 1}`}
+              alt={item.title || `Hình ảnh tổng quan dự án Sola Global City Quận 2 - Biệt thự cao cấp ${index + 1}`}
               className="w-full h-full object-cover"
+              loading="lazy"
+              width="1920"
+              height="1080"
             />
           </motion.div>
         ))}

@@ -128,12 +128,15 @@ export function AmenitiesSection() {
                   <motion.img
                     key={activeImageIndex}
                     src={images[activeImageIndex].imageUrl}
-                    alt={activeAmenity?.name}
+                    alt={`Hình ảnh tiện ích ${activeAmenity?.name} - Sola Global City Quận 2 - ${activeAmenity?.description || 'Tiện ích đẳng cấp cho cư dân'}`}
                     className="w-full h-full object-cover"
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -50 }}
                     transition={{ duration: 0.3 }}
+                    loading="lazy"
+                    width="1200"
+                    height="675"
                   />
                 </AnimatePresence>
 

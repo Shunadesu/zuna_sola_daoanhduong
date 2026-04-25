@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
 
-Sitemap: https://sola.vn/sitemap.xml
+Sitemap: https://soladaoanhduong.nthanhproperty.fun/sitemap.xml

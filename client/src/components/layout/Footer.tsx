@@ -17,6 +17,11 @@ const footerLinks = {
     { label: 'Tiện ích', href: '#amenities' },
     { label: 'Hình ảnh', href: '#gallery' },
   ],
+  thongtin: [
+    { label: 'Về Chúng Tôi', href: '/about' },
+    { label: 'Vị Trí Dự Án', href: '/location' },
+    { label: 'Câu Hỏi Thường Gặp', href: '/faq' },
+  ],
 };
 
 export function Footer() {
@@ -74,6 +79,27 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               {footerLinks.duan.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    className="text-gray-600 hover:text-primary transition-colors text-sm flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Info Links */}
+          <div>
+            <h4 className="font-semibold mb-4 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Thông Tin
+            </h4>
+            <ul className="space-y-3">
+              {footerLinks.thongtin.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}

@@ -1,12 +1,30 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Header, Footer, SmoothScroll } from '@/components/layout';
 import { FloatingContactBar } from '@/components/public';
 import { HeroSection, OverviewSection, AmenitiesSection, GallerySection, ContactSection, SellerSection, PerspectiveSection } from '@/components/sections';
-import { trackApi } from '@/lib/api';
+import { FAQSection } from '@/components/sections/FAQSection';
 import { OverviewSection2 } from './components/sections/OverviewSection2';
+import { trackApi } from '@/lib/api';
+
+// Lazy load pages for better performance (code splitting)
+const About = lazy(() => import('@/pages/About'));
+const Location = lazy(() => import('@/pages/Location'));
+const FAQ = lazy(() => import('@/pages/FAQ'));
+
+// Loading fallback component
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <p className="text-gray-500">Đang tải...</p>
+      </div>
+    </div>
+  );
+}
 
 const SITE_CONFIG = {
   name: 'Biệt Thự Sola Đảo Ảnh Dương',
@@ -28,7 +46,6 @@ function PageTracker() {
 function SellerPersonSchema() {
   const location = useLocation();
   useEffect(() => {
-    // Schema is handled in index.html
   }, [location]);
   return null;
 }
@@ -61,6 +78,7 @@ function Home() {
       <GallerySection />
       <OverviewSection2 />
       <AmenitiesSection />
+      <FAQSection />
       <ContactSection />
     </>
   );
@@ -81,9 +99,15 @@ function App() {
           <div className="min-h-screen bg-white">
             <Header />
             <main id="main-content">
-              <Routes>
-                <Route path="/" element={<Home />} />
-              </Routes>
+              <h1 className="sr-only">Biệt Thự Sola Đảo Ảnh Dương - Sola Global City Quận 2 | Dự án biệt thự cao cấp TP.HCM</h1>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/location" element={<Location />} />
+                  <Route path="/faq" element={<FAQ />} />
+                </Routes>
+              </Suspense>
             </main>
             <Footer />
             <FloatingContactBar />

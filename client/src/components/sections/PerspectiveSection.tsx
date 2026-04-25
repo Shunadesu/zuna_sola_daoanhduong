@@ -144,21 +144,23 @@ export function PerspectiveSection() {
               ];
               const spanClass = spanPatterns[idx % spanPatterns.length];
               return (
-                <motion.div
-                  key={item._id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.05 }}
-                  className={`relative overflow-hidden w-full h-full rounded-xl cursor-pointer group ${spanClass}`}
-                  onClick={() => openLightbox(item, idx)}
-                >
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
+              <motion.div
+                key={item._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className={`relative overflow-hidden w-full h-full rounded-xl cursor-pointer group ${spanClass}`}
+                onClick={() => openLightbox(item, idx)}
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.title || `Hình ảnh phối cảnh dự án Sola Global City Quận 2 - Biệt thự cao cấp ${idx + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  width="800"
+                  height="600"
+                />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3 shadow-lg">
                       <ZoomIn className="w-5 h-5 text-gray-800" />
@@ -233,7 +235,7 @@ export function PerspectiveSection() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
                 src={lightbox.item.imageUrl}
-                alt={lightbox.item.title}
+                alt={`Phối cảnh dự án Sola Global City - ${lightbox.item.title || 'Hình ảnh dự án biệt thự cao cấp Quận 2'}`}
                 className="max-w-full max-h-[75vh] object-contain rounded-lg"
                 onClick={(e) => e.stopPropagation()}
               />

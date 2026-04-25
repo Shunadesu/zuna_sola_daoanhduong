@@ -130,6 +130,8 @@ export function HeroSection() {
                   backgroundImage: `url(${banner.imageUrl})`,
                   transform: `scale(${activeIndex === index ? 1.08 : 1})`,
                 }}
+                role="img"
+                aria-label={`Biệt Thự Sola Đảo Ảnh Dương - ${banner.title} - ${banner.subtitle || 'Dự án biệt thự cao cấp Sola Global City Quận 2'}`}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
 
