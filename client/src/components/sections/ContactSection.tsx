@@ -109,7 +109,7 @@ export function ContactSection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="bg-white p-8 md:p-12 rounded-3xl border border-gray-100 shadow-lg">
+            <div className="!bg-white p-8 md:p-12 rounded-3xl border border-gray-100 shadow-lg">
               {isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}

@@ -73,6 +73,7 @@ function QuoteModal({ open, onClose }: QuoteModalProps) {
       if (data.success) {
         toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
         setFormData({ fullName: '', phone: '', email: '', apartment: '' });
+        localStorage.setItem('quote_submitted', 'true');
         onClose();
       } else {
         toast.error(data.message || 'Có lỗi xảy ra');
@@ -215,17 +216,24 @@ export function FloatingContactBar() {
     fetchContacts();
   }, [fetchContacts]);
 
-  // Auto-open modal once after 10s on first visit
+  // Auto-open modal after 3s, repeat every 15s (only if not submitted)
   useEffect(() => {
-    const hasShownModal = localStorage.getItem('quote_modal_shown');
-    if (!hasShownModal) {
-      const timer = setTimeout(() => {
-        setShowQuoteModal(true);
-        localStorage.setItem('quote_modal_shown', 'true');
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    const hasSubmitted = localStorage.getItem('quote_submitted');
+    if (hasSubmitted || showQuoteModal) return;
+
+    const timer = setTimeout(() => {
+      setShowQuoteModal(true);
+    }, 3000);
+
+    const interval = setInterval(() => {
+      setShowQuoteModal(true);
+    }, 15000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [showQuoteModal]);
 
   const handleClick = (type: string, value: string) => {
     switch (type) {
