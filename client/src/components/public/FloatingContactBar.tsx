@@ -4,6 +4,7 @@ import { Phone, MessageCircle, FileText, X, Send, Calculator } from 'lucide-reac
 import { cn } from '@/lib/utils';
 import { useContactStore } from '@/store';
 import { bannerApi } from '@/lib/api';
+import { emailService } from '@/services/emailService';
 import toast from 'react-hot-toast';
 
 const contactIcons: Record<string, { icon: React.ReactNode; bg: string; href?: string }> = {
@@ -72,6 +73,19 @@ function QuoteModal({ open, onClose }: QuoteModalProps) {
       const data = await res.json();
       if (data.success) {
         toast.success('Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
+
+        // Send notification email via EmailJS
+        await emailService.sendNotification({
+          to_name: 'Sola Global City Team',
+          to_email: 'thanhpham.02092002@gmail.com',
+          from_name: formData.fullName,
+          from_phone: formData.phone,
+          from_email: formData.email,
+          apartment: formData.apartment,
+          message: `Yêu cầu tư vấn từ ${formData.fullName} - SĐT: ${formData.phone}`,
+          source: 'popup',
+        });
+
         setFormData({ fullName: '', phone: '', email: '', apartment: '' });
         localStorage.setItem('quote_submitted', 'true');
         onClose();

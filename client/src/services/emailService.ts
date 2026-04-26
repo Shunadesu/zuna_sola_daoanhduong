@@ -32,8 +32,8 @@ export interface EmailParams {
 // Template variables for EmailJS
 const createTemplateParams = (params: EmailParams) => ({
   to_name: 'Sola Global City Team',
-  to_email: 'namp280918@gmail.com',
-  // to_email: 'thanhpham.02092002@gmail.com',
+  // to_email: 'namp280918@gmail.com',
+  to_email: 'thanhpham.02092002@gmail.com',
   from_name: params.from_name || 'Khách hàng',
   from_phone: params.from_phone,
   from_email: params.from_email || 'Không có',
@@ -51,22 +51,13 @@ export const emailService = {
    */
   async sendNotification(params: EmailParams): Promise<boolean> {
     try {
-      // Debug: Log config
-      console.log('📧 EmailJS Config:', {
-        serviceId: EMAILJS_CONFIG.serviceId ? '✓ Set' : '✗ Missing',
-        templateId: EMAILJS_CONFIG.templateId ? '✓ Set' : '✗ Missing',
-        publicKey: EMAILJS_CONFIG.publicKey ? '✓ Set' : '✗ Missing',
-      });
-
       // Skip if not configured
       if (!isEmailConfigured()) {
-        console.warn('⚠️ EmailJS not configured. Email will not be sent.');
-        console.log('📋 Email params:', params);
-        return true; // Return true to not block the form submission
+        console.warn('EmailJS not configured. Email will not be sent.');
+        return true;
       }
 
       const templateParams = createTemplateParams(params);
-      console.log('📤 Sending email with params:', templateParams);
 
       const response = await emailjs.send(
         EMAILJS_CONFIG.serviceId,
@@ -75,16 +66,9 @@ export const emailService = {
         EMAILJS_CONFIG.publicKey
       );
 
-      console.log('✅ EmailJS Response:', response);
-
-      if (response.status === 200) {
-        console.log('✅ Email sent successfully:', response);
-        return true;
-      }
-
-      return false;
+      return response.status === 200;
     } catch (error) {
-      console.error('❌ Failed to send email:', error);
+      console.error('Failed to send email:', error);
       return false;
     }
   },
