@@ -230,7 +230,7 @@ export function FloatingContactBar() {
     fetchContacts();
   }, [fetchContacts]);
 
-  // Auto-open modal after 3s, repeat every 15s (only if not submitted)
+  // Auto-open modal after 3s, repeat every 45s (only if not submitted)
   useEffect(() => {
     const hasSubmitted = localStorage.getItem('quote_submitted');
     if (hasSubmitted || showQuoteModal) return;
@@ -241,7 +241,7 @@ export function FloatingContactBar() {
 
     const interval = setInterval(() => {
       setShowQuoteModal(true);
-    }, 15000);
+    }, 45000);
 
     return () => {
       clearTimeout(timer);
