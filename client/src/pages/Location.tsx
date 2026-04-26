@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { MapPin, Clock, Phone, Car, Train, Building, GraduationCap, Hospital, ShoppingBag } from 'lucide-react';
+import { MapPin, Car, Train, Building, GraduationCap, Heart, ShoppingBag } from 'lucide-react';
 
 const LocationPage = () => {
   const connectivity = [
@@ -14,7 +14,7 @@ const LocationPage = () => {
 
   const amenities = [
     { icon: GraduationCap, name: 'Trường quốc tế', distance: '3-5 phút', items: ['AIS', 'ISMS', 'Trường ĐH Quốc gia'] },
-    { icon: Hospital, name: 'Bệnh viện quốc tế', distance: '5-10 phút', items: ['BV Quốc tế Việt Đức', 'BV Tim Tâm Đức', 'BVFV'] },
+    { icon: Heart, name: 'Bệnh viện quốc tế', distance: '5-10 phút', items: ['BV Quốc tế Việt Đức', 'BV Tim Tâm Đức', 'BVFV'] },
     { icon: ShoppingBag, name: 'Trung tâm thương mại', distance: '5-10 phút', items: ['VivoCity', 'Paragon Center', 'Estella Place'] },
     { icon: Building, name: 'Khu văn phòng', distance: '5-10 phút', items: ['Masterise Centre', 'Vinhomes Central Park', 'Thảo Điền Square'] },
   ];
